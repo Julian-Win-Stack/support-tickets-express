@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Support Tickets</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+
+  <body>
+    <main class="container">
+      <header class="header">
+        <div>
+          <h1>Support Tickets</h1>
+        </div>
+
+        <div class="me">
+          <div class="me-label">Session</div>
+          <div class="me-value">Not logged in</div>
+        </div>
+      </header>
+
+      <section class="grid">
+        <!-- Auth -->
+        <div class="card">
+          <h2>Auth</h2>
+
+          <div class="row">
+            <button class="btn btn-ghost" type="button">Seed admin</button>
+          </div>
+
+          <form class="stack" autocomplete="on">
+            <h3>Register</h3>
+            <label class="field">
+              <span class="label">Name</span>
+              <input name="name" placeholder="Your name" />
+            </label>
+
+            <label class="field">
+              <span class="label">Email</span>
+              <input name="email" placeholder="you@example.com" />
+            </label>
+
+            <label class="field">
+              <span class="label">Password</span>
+              <input name="password" type="password" placeholder="••••••••" />
+            </label>
+
+            <button class="btn" type="submit">Register</button>
+            <div class="hint">After register, you can auto-login (handled by JS).</div>
+          </form>
+
+          <form class="stack" autocomplete="on">
+            <h3>Login</h3>
+
+            <label class="field">
+              <span class="label">Email</span>
+              <input name="email" placeholder="admin@local.dev" />
+            </label>
+
+            <label class="field">
+              <span class="label">Password</span>
+              <input name="password" type="password" placeholder="admin1234" />
+            </label>
+
+            <button class="btn" type="submit">Login</button>
+            <div class="hint">Admin default: admin@local.dev / admin1234</div>
+          </form>
+
+          <button class="btn btn-danger" type="button">Logout</button>
+
+          <div class="msg" role="status" aria-live="polite">
+            Messages will show here (from JS).
+          </div>
+        </div>
+
+        <!-- Create ticket -->
+        <div class="card">
+          <h2>Create Ticket</h2>
+
+          <form class="stack">
+            <label class="field">
+              <span class="label">Title</span>
+              <input name="title" placeholder="Short summary" />
+            </label>
+
+            <label class="field">
+              <span class="label">Body</span>
+              <textarea name="body" placeholder="Describe your issue…"></textarea>
+            </label>
+
+            <button class="btn" type="submit">Create</button>
+          </form>
+
+          <div class="msg" role="status" aria-live="polite">
+            Create-ticket status will show here.
+          </div>
+        </div>
+
+        <!-- Tickets list -->
+        <div class="card span2">
+          <h2>Tickets</h2>
+
+          <div class="row">
+            <label class="field inline">
+              <span class="label">Status</span>
+              <select>
+                <option value="">All</option>
+                <option value="open">open</option>
+                <option value="in_progress">in_progress</option>
+                <option value="resolved">resolved</option>
+              </select>
+            </label>
+
+            <label class="field inline grow">
+              <span class="label">Search</span>
+              <input placeholder="Search title/body…" />
+            </label>
+
+            <button class="btn btn-ghost" type="button">Refresh</button>
+          </div>
+
+          <div class="tickets">
+            <!-- Example ticket cards (JS will render real ones) -->
+            <article class="ticket">
+              <div class="ticket-top">
+                <div class="ticket-title">
+                  <span class="mono">#12</span>
+                  <strong>Checkout page fails</strong>
+                </div>
+                <span class="badge">open</span>
+              </div>
+              <div class="ticket-meta">Owner: Alex (alex@mail.com)</div>
+              <div class="ticket-meta">Created: Jan 16, 2026</div>
+              <div class="ticket-actions">
+                <button class="btn btn-ghost" type="button">Open</button>
+              </div>
+            </article>
+
+            <article class="ticket">
+              <div class="ticket-top">
+                <div class="ticket-title">
+                  <span class="mono">#11</span>
+                  <strong>Refund request</strong>
+                </div>
+                <span class="badge badge-muted">resolved</span>
+              </div>
+              <div class="ticket-meta">Owner: Sam (sam@mail.com)</div>
+              <div class="ticket-meta">Created: Jan 14, 2026</div>
+              <div class="ticket-actions">
+                <button class="btn btn-ghost" type="button">Open</button>
+              </div>
+            </article>
+          </div>
+
+          <div class="hint">Total: 0 (showing 0) — JS will update this.</div>
+        </div>
+
+        <!-- Ticket detail -->
+        <div class="card span2">
+          <h2>Ticket Detail</h2>
+
+          <div class="detail">
+            <div class="detail-header">
+              <div>
+                <div class="detail-title">
+                  <strong>Ticket #12</strong>
+                  <span class="badge">open</span>
+                </div>
+                <div class="ticket-meta">Updated: Jan 16, 2026</div>
+              </div>
+
+              <div class="detail-actions">
+                <button class="btn btn-ghost" type="button">Mark resolved</button>
+                <button class="btn btn-ghost" type="button">Set in_progress</button>
+                <button class="btn btn-ghost" type="button">Set open</button>
+              </div>
+            </div>
+
+            <div class="stack">
+              <label class="field">
+                <span class="label">Title</span>
+                <input value="Checkout page fails" />
+              </label>
+
+              <label class="field">
+                <span class="label">Body</span>
+                <textarea>When I click Pay, I get a 500 error.</textarea>
+              </label>
+
+              <button class="btn" type="button">Save edits</button>
+            </div>
+
+            <hr class="divider" />
+
+            <h3>Internal notes (admin only)</h3>
+            <div class="stack">
+              <label class="field">
+                <span class="label">Add note</span>
+                <textarea placeholder="Add internal note…"></textarea>
+              </label>
+              <button class="btn btn-ghost" type="button">Add note</button>
+            </div>
+
+            <h3>Notes</h3>
+            <div class="notes">
+              <div class="note">
+                <div class="note-top">
+                  <strong>Admin</strong>
+                  <span class="ticket-meta">Jan 16, 2026</span>
+                </div>
+                <div>Likely missing STRIPE_SECRET in env.</div>
+              </div>
+
+              <div class="note">
+                <div class="note-top">
+                  <strong>Admin</strong>
+                  <span class="ticket-meta">Jan 15, 2026</span>
+                </div>
+                <div>Reproduced on staging.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="hint">JS will replace this panel when you select a ticket.</div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
