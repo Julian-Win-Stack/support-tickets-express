@@ -73,3 +73,8 @@ export async function loginUser(req,res) {
     }
     
 }
+
+export async function logoutUser(req,res) {
+    
+    
+}
