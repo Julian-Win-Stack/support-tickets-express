@@ -1,18 +1,18 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
+import { initDB } from './db/initDB.js';
 
 const app = express();
 const PORT = 3000;
 
-// --- needed for ES modules ---
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// --- serve static files from /public ---
+await initDB();
+
 app.use(express.static(path.join(__dirname, "public")));
 
-// --- root route (optional but clean) ---
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
