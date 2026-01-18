@@ -51,7 +51,7 @@ export async function loginUser(req,res) {
         }
 
         const dbRow = await db.get(`
-            SELECT password_hash, id, name FROM users 
+            SELECT password_hash, id, name, role FROM users 
             WHERE email = ?
             `, [cleanEmail]);
 
@@ -69,7 +69,7 @@ export async function loginUser(req,res) {
 
         req.session.userId = dbRow.id;
 
-        return res.json({ok: true, name: dbRow.name});
+        return res.json({ok: true, name: dbRow.name, role: dbRow.role});
 
     }catch (error){
         console.error(error);
