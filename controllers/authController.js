@@ -88,3 +88,21 @@ export async function logoutUser(req,res) {
     req.clearCookie('sid');
     return res.json({ok: true});
 }
+
+export async function checkMe(req,res) {
+    const userId = req.session.userId;
+
+    if (userId){
+        const db = await getDBConnection();
+
+        const dbRow = await db.get(`
+            SELECT name, role FROM users
+            WHERE users.id = ?
+            `, [userId]);
+
+        return res.json({ok: true, name: dbRow.name, role: dbRow.role});
+    }else{
+        return res.json({ok: false});
+    }
+    
+}
