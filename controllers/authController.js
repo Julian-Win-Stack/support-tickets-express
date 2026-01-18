@@ -75,6 +75,16 @@ export async function loginUser(req,res) {
 }
 
 export async function logoutUser(req,res) {
+
+    if (!req.session){
+        return res.json({ok: true});
+    }
+
+    req.session.destroy( (error)=>{
+        console.error(error);
+        return res.status(500).json({error: 'User failed to logout. Please try again.'});
+    })
     
-    
+    req.clearCookie('sid');
+    return res.json({ok: true});
 }

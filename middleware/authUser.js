@@ -4,6 +4,5 @@ export function authUser(req,res,next){
     if (!userId){
         return res.status(401).json({error: 'User not logged in'});
     }
-
     next();
 }
