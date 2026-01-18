@@ -1,13 +1,13 @@
 const registerForm = document.getElementById('register-form');
 const registerBtn = document.getElementById('register-btn');
+const registerMessage = document.getElementById('register-message');
 
 registerForm.addEventListener('submit', async(e)=>{
     e.preventDefault();
-    console.log('form submitted');
+
     const registerNameRaw = document.getElementById('register-name');
     const registerEmailRaw = document.getElementById('register-email');
     const registerPasswordRaw = document.getElementById('register-password');
-    const registerMessage = document.getElementById('register-message');
 
     const registerName = registerNameRaw.value.trim();
     const registerEmail = registerEmailRaw.value.trim();
@@ -16,7 +16,6 @@ registerForm.addEventListener('submit', async(e)=>{
     registerMessage.textContent = '';
     registerBtn.disabled = true;
     
-
     try{
     const res = await fetch('/api/auth/register', {
         method: 'POST',

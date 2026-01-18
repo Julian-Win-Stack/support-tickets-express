@@ -50,27 +50,27 @@
             <div class="hint" id="register-message">After register, you can auto-login (handled by JS).</div>
           </form>
 
-          <form class="stack" autocomplete="on">
+          <form class="stack" autocomplete="on" id="login-form">
             <h3>Login</h3>
 
             <label class="field">
               <span class="label">Email</span>
-              <input name="email" placeholder="admin@local.dev" />
+              <input name="email" placeholder="admin@local.dev" id="login-email"/>
             </label>
 
             <label class="field">
               <span class="label">Password</span>
-              <input name="password" type="password" placeholder="admin1234" />
+              <input name="password" type="password" placeholder="admin1234" id="login-password"/>
             </label>
 
-            <button class="btn" type="submit">Login</button>
-            <div class="hint">Admin default: admin@local.dev / admin1234</div>
+            <button class="btn" type="submit" id="login-btn">Login</button>
+            <div class="hint" id="login-name"></div>
           </form>
 
-          <button class="btn btn-danger" type="button">Logout</button>
+          <button class="btn btn-danger" type="button" id="logout-btn">Logout</button>
 
-          <div class="msg" role="status" aria-live="polite">
-            Messages will show here (from JS).
+          <div class="msg" role="status" aria-live="polite" id="login-status">
+            Not logged in
           </div>
         </div>
 
@@ -226,5 +226,7 @@
       </section>
     </main>
     <script src="./js/registerUser.js" type="module"></script>
+    <script src="./js/loginUser.js" type="module"></script>
+    <script src="./js/logoutUser.js" type="module"></script>
   </body>
 </html>

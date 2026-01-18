@@ -42,16 +42,16 @@ export async function registerUser(req,res) {
 export async function loginUser(req,res) {
     try{
         const db = await getDBConnection();
-        const { email = '', incomingPassword = '' } = req.body;
+        const { loginEmail = '', loginPassword = '' } = req.body;
     
-        const cleanEmail = email.trim();
+        const cleanEmail = loginEmail.trim();
     
-        if (!cleanEmail || !incomingPassword){
+        if (!cleanEmail || !loginPassword){
             return res.status(400).json({error: 'Missing input fields'});
         }
 
         const dbRow = await db.get(`
-            SELECT password_hash, id FROM users 
+            SELECT password_hash, id, name FROM users 
             WHERE email = ?
             `, [cleanEmail]);
 
@@ -61,7 +61,7 @@ export async function loginUser(req,res) {
 
         const dbPasswordHash = dbRow.password_hash;
 
-        const isPasswordMatch = await bcrypt.compare(incomingPassword, dbPasswordHash);
+        const isPasswordMatch = await bcrypt.compare(loginPassword, dbPasswordHash);
 
         if (!isPasswordMatch){
             return res.status(400).json({error: 'Incorrect password'});
@@ -69,7 +69,7 @@ export async function loginUser(req,res) {
 
         req.session.userId = dbRow.id;
 
-        return res.json({ok: true});
+        return res.json({ok: true, name: dbRow.name});
 
     }catch (error){
         console.error(error);
