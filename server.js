@@ -4,6 +4,7 @@ import session from "express-session";
 import "dotenv/config";
 import { fileURLToPath } from "url";
 import { initDB } from './db/initDB.js';
+import { authRouter } from './routes/authRouter.js'
 
 const app = express();
 const PORT = 3000;
@@ -34,12 +35,14 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
-});
+})
 
 app.get('/api/health', (req,res)=>{
   res.json({ok: true});
-});
+})
+
+app.use('/api/auth', authRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
-});
+})

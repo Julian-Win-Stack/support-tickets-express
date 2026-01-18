@@ -1,5 +1,5 @@
 import { getDBConnection } from "./db/db.js";
-const tableName = 'notes';
+const tableName = 'users';
 
 async function logTable() {
     const db = await getDBConnection();
