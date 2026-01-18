@@ -4,12 +4,12 @@ import { getDBConnection } from '../db/db.js';
 export async function registerUser(req,res) {
     try{
         const db = await getDBConnection();
-        const { name = '', email = '', password = '' } = req.body;
+        const { registerName = '', registerEmail = '', registerPassword = '' } = req.body;
     
-        const cleanName = name.trim();
-        const cleanEmail = email.trim();
+        const cleanName = registerName.trim();
+        const cleanEmail = registerEmail.trim();
     
-        if (!cleanName || !cleanEmail || !password){
+        if (!cleanName || !cleanEmail || !registerPassword){
             return res.status(400).json({error: 'Missing input fields'});
         }
 
@@ -24,14 +24,16 @@ export async function registerUser(req,res) {
     
         const saltRounds = 10;
     
-        const passwordHash = await bcrypt.hash(password, saltRounds);
+        const passwordHash = await bcrypt.hash(registerPassword, saltRounds);
     
         await db.run(`
             INSERT INTO users (name, email, password_hash)
             VALUES (?, ?, ?)
             `, [cleanName, cleanEmail, passwordHash]);
 
-    } catch (error){
+        return res.status(201).json({ok: true})
+
+        } catch (error){
         console.error(error);
         return res.status(500).json({error: 'Server failed. Please try again.'});
     }
@@ -67,6 +69,8 @@ export async function loginUser(req,res) {
 
         req.session.userId = dbRow.id;
 
+        return res.json({ok: true});
+
     }catch (error){
         console.error(error);
         return res.status(500).json({error: 'Server failed. Please try again.'});
@@ -81,12 +85,16 @@ export async function logoutUser(req,res) {
     }
 
     req.session.destroy( (error)=>{
-        console.error(error);
-        return res.status(500).json({error: 'User failed to logout. Please try again.'});
+        if (error){
+            console.error(error);
+            return res.status(500).json({error: 'User failed to logout. Please try again.'});
+        }
+
+    res.clearCookie('sid');
+    return res.json({ok: true});
     })
     
-    req.clearCookie('sid');
-    return res.json({ok: true});
+
 }
 
 export async function checkMe(req,res) {
