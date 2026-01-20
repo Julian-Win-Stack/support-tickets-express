@@ -1,4 +1,3 @@
-// May be admins are not allowed to create tickets? ask Chatgpt
 // for getTickets function, we will have to send the number of tickets found to the frontend
 
 import { getDBConnection } from '../db/db.js';
@@ -72,6 +71,8 @@ export async function getTickets(req,res) {
         const userInput = [];
 
         if (roleRow.role === 'admin'){
+            const totalTicketArray = await db.all(mainSqliteCode[0]);
+            const numberOfTotalTicket = totalTicketArray.length;
             
             if ( cleanStatus || cleanSearch ){
                 mainSqliteCode.push('WHERE');
@@ -95,7 +96,7 @@ export async function getTickets(req,res) {
                 const finalMainSqliteCode = mainSqliteCode.join(' ');
                 console.log('admin 1 => ', finalMainSqliteCode)
                 const ticketArray = await db.all(finalMainSqliteCode, userInput);
-                return res.json({data: ticketArray});
+                return res.json({data: ticketArray, totalTicket: numberOfTotalTicket, ticketsShown: ticketArray.length});
             }
 
             if (joinSqliteCode.length > 1 && userInput.length > 1){
@@ -105,18 +106,19 @@ export async function getTickets(req,res) {
                 const finalMainSqliteCode = mainSqliteCode.join(' ');
                 console.log('admin 2 => ', finalMainSqliteCode)
                 const ticketArray = await db.all(finalMainSqliteCode, userInput);
-                return res.json({data: ticketArray});
+                return res.json({data: ticketArray, totalTicket: numberOfTotalTicket, ticketsShown: ticketArray.length});
             }
 
-            console.log('admin 3 => ', mainSqliteCode[0])
-            const ticketArray = await db.all(mainSqliteCode[0]);
-            return res.json({data: ticketArray});
+        return res.json({data: totalTicketArray, totalTicket: numberOfTotalTicket, ticketsShown: numberOfTotalTicket});
 
 
         } else if (roleRow.role === 'user'){
 
              mainSqliteCode.push('WHERE T.user_id = ?');
              userInput.push(userId);
+
+            const totalUserTicketArray = await db.all(mainSqliteCode.join(' '), userInput);
+            const numberOfTotalTicket = totalUserTicketArray.length;
 
             if (cleanStatus || cleanSearch){
                 mainSqliteCode.push('AND');
@@ -139,7 +141,7 @@ export async function getTickets(req,res) {
                 mainSqliteCode.push(joinSqliteCode[0]);
                 const finalMainSqliteCode = mainSqliteCode.join(' ');
                 const ticketArray = await db.all(finalMainSqliteCode, userInput);
-                return res.json({data: ticketArray});
+                return res.json({data: ticketArray, totalTicket: numberOfTotalTicket, ticketsShown: ticketArray.length});
             }
 
             if (joinSqliteCode.length > 1 && userInput.length > 1){
@@ -148,12 +150,12 @@ export async function getTickets(req,res) {
                 mainSqliteCode.push(finalJoinSqliteCode);
                 const finalMainSqliteCode = mainSqliteCode.join(' ');
                 const ticketArray = await db.all(finalMainSqliteCode, userInput);
-                return res.json({data: ticketArray});
+                return res.json({data: ticketArray, totalTicket: numberOfTotalTicket, ticketsShown: ticketArray.length});
             }
 
         const finalMainSqliteCode = mainSqliteCode.join(' ');
         const ticketArray = await db.all(finalMainSqliteCode, userInput);
-        return res.json({data: ticketArray});
+        return res.json({data: ticketArray, totalTicket: numberOfTotalTicket, ticketsShown: ticketArray.length});
 
         }
     }catch(error){
