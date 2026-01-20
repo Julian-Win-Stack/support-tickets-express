@@ -1,3 +1,6 @@
+// May be admins are not allowed to create tickets? ask Chatgpt
+// for getTickets function, we will have to send the number of tickets found to the frontend
+
 import { getDBConnection } from '../db/db.js';
 import { getWordCount } from '../BackendHelper/getWordCount.js';
 
@@ -34,7 +37,7 @@ export async function createTickets(req,res) {
             `, [userId, cleanTitle, cleanBody, 'open']);
 
 
-        return res.status(201).json({ok: true, title: cleanTitle, body: cleanBody});
+        return res.status(201).json({ok: true});
 
     }catch(error){
         console.error(error);
@@ -42,69 +45,225 @@ export async function createTickets(req,res) {
     }
 }
 
-export async function getTickets(req, res) {
+export async function getTickets(req,res) {
     try{
+
         const db = await getDBConnection();
         const userId = req.session.userId;
 
+        const { status = '', search = ''} = req.query;
+        const cleanStatus = status.trim();
+        const cleanSearch = search.trim();
 
-        if (req.query){
-            console.log('query is triggered')
-            const { status = '', search = ''} = req.query;
+        const roleRow = await db.get(
+            `SELECT role 
+            FROM users 
+            WHERE id = ?`,
+            [userId]
+        );
 
-            const cleanStatus = status.trim();
-            const cleanSearch = search.trim();
+        const mainSqliteCode = 
+                [`SELECT T.*, U.email 
+                FROM tickets T
+                JOIN users U ON T.user_id = U.id`];
+        
+        const joinSqliteCode = [];
 
-            if (cleanStatus && !cleanSearch){
-                console.log('1 is triggered')
-                const statusArray = await db.all(
-                    `SELECT T.*, U.email FROM tickets T
-                    JOIN users U ON T.user_id = U.id WHERE 
-                    T.user_id = ? AND T.status = ?`, [userId, cleanStatus]
-                );
+        const userInput = [];
 
-            return res.json({data : statusArray});
+        if (roleRow.role === 'admin'){
+            
+            if ( cleanStatus || cleanSearch ){
+                mainSqliteCode.push('WHERE');
             }
 
-            if (!cleanStatus && cleanSearch){
-                const dbSearchInput = `%${cleanSearch}%`;
-
-                const searchArray = await db.all(
-                    `SELECT T.*, U.email FROM tickets T
-                     JOIN users U ON T.user_id = U.id WHERE 
-                     T.user_id = ? AND
-                     (T.title LIKE ? OR T.body LIKE ?)
-                    `, [userId, dbSearchInput, dbSearchInput]
-                );
-                return res.json({data : searchArray});
+            if (cleanStatus){
+                joinSqliteCode.push(`T.status = ?`);
+                userInput.push(cleanStatus);
             }
 
-            if (cleanStatus && cleanSearch){
+            if (cleanSearch){
                 const dbSearchInput = `%${cleanSearch}%`;
+                joinSqliteCode.push(`(T.title LIKE ? OR T.body LIKE ?)`);
+                userInput.push(dbSearchInput);
+                userInput.push(dbSearchInput);
+            }
 
-                const combineArray = await db.all(
-                    `SELECT T.*, U.email FROM tickets T
-                     JOIN users U ON T.user_id = U.id WHERE 
-                     T.user_id = ? AND
-                     T.status = ? AND
-                     (T.title LIKE ? OR T.body LIKE ?)
-                    `, [userId, cleanStatus, dbSearchInput, dbSearchInput]
-                );
-
-                return res.json({data : combineArray});
+            if (joinSqliteCode.length === 1){
                 
+                mainSqliteCode.push(joinSqliteCode[0]);
+                const finalMainSqliteCode = mainSqliteCode.join(' ');
+                console.log('admin 1 => ', finalMainSqliteCode)
+                const ticketArray = await db.all(finalMainSqliteCode, userInput);
+                return res.json({data: ticketArray});
             }
 
-        }
+            if (joinSqliteCode.length > 1 && userInput.length > 1){
 
-        const ticketArray = await db.all(
-            `SELECT T.*, U.email FROM tickets T
-             JOIN users U ON T.user_id = U.id
-             WHERE T.user_id = ?`, [userId]);
+                const finalJoinSqliteCode = joinSqliteCode.join(' AND ');
+                mainSqliteCode.push(finalJoinSqliteCode);
+                const finalMainSqliteCode = mainSqliteCode.join(' ');
+                console.log('admin 2 => ', finalMainSqliteCode)
+                const ticketArray = await db.all(finalMainSqliteCode, userInput);
+                return res.json({data: ticketArray});
+            }
 
+            console.log('admin 3 => ', mainSqliteCode[0])
+            const ticketArray = await db.all(mainSqliteCode[0]);
+            return res.json({data: ticketArray});
+
+
+        } else if (roleRow.role === 'user'){
+
+             mainSqliteCode.push('WHERE T.user_id = ?');
+             userInput.push(userId);
+
+            if (cleanStatus || cleanSearch){
+                mainSqliteCode.push('AND');
+            }
+
+            if (cleanStatus){
+                joinSqliteCode.push(`T.status = ?`);
+                userInput.push(cleanStatus);
+            }
+
+            if (cleanSearch){
+                const dbSearchInput = `%${cleanSearch}%`;
+                joinSqliteCode.push(`(T.title LIKE ? OR T.body LIKE ?)`);
+                userInput.push(dbSearchInput);
+                userInput.push(dbSearchInput);
+            }
+
+            if (joinSqliteCode.length === 1){
+
+                mainSqliteCode.push(joinSqliteCode[0]);
+                const finalMainSqliteCode = mainSqliteCode.join(' ');
+                const ticketArray = await db.all(finalMainSqliteCode, userInput);
+                return res.json({data: ticketArray});
+            }
+
+            if (joinSqliteCode.length > 1 && userInput.length > 1){
+
+                const finalJoinSqliteCode = joinSqliteCode.join(' AND ');
+                mainSqliteCode.push(finalJoinSqliteCode);
+                const finalMainSqliteCode = mainSqliteCode.join(' ');
+                const ticketArray = await db.all(finalMainSqliteCode, userInput);
+                return res.json({data: ticketArray});
+            }
+
+        const finalMainSqliteCode = mainSqliteCode.join(' ');
+        const ticketArray = await db.all(finalMainSqliteCode, userInput);
         return res.json({data: ticketArray});
 
+        }
+    }catch(error){
+        console.error(error);
+        return res.status(500).json({error: 'Server failed. Please try again.'});
+    }
+    
+}
+
+export async function getTicketsById(req,res) {
+    try{
+        const db = await getDBConnection();
+        const userId = req.session.userId;
+    
+        const checkAdminRow = await db.get(`SELECT role FROM users WHERE id = ?`, [userId]);
+    
+        if (!checkAdminRow){
+            return res.status(401).json({error: 'User not logged in. Please login again. '});
+        }
+       
+        const ticketId = Number(req.params.id);
+
+        if (!Number.isInteger(ticketId)){
+            return res.status(400).json({error: 'Invalid ticket id'});
+        }
+
+        if (checkAdminRow.role === 'admin'){
+
+            const ticketRow = await db.get(
+                `SELECT T.*, U.email FROM tickets T
+                JOIN users U ON T.user_id = U.id WHERE 
+                T.id = ?`, [ticketId]
+            );
+        
+            if (!ticketRow){
+                return res.status(404).json({error: 'Ticket not found'});
+            }
+        
+            return res.json({data: ticketRow});
+
+        } else if (checkAdminRow.role === 'user'){
+            const ticketRow = await db.get(
+                `SELECT T.*, U.email FROM tickets T
+                JOIN users U ON T.user_id = U.id WHERE 
+                T.id = ? AND T.user_id = ?`, [ticketId, userId]
+            );
+        
+            if (!ticketRow){
+                return res.status(404).json({error: 'Ticket not found'});
+            }
+        
+            return res.json({data: ticketRow});
+        }
+
     } catch(error){
+        console.error(error);
+        return res.status(500).json({error: 'Server failed. Please try again.'});
+    }
+}
+
+
+
+export async function updateTicketsTitle_Body(req,res) {
+    try{
+
+        const db = await getDBConnection();
+        const userId = req.session.userId;
+
+        const { title = '', body = '' } = req.body;
+
+        const cleanTitle = title.trim();
+        const cleanBody = body.trim();
+
+        if (!cleanTitle || !cleanBody){
+            return res.status(400).json({error: 'Missing fields'});
+        }
+    
+        const ticketId = Number(req.params.id);
+        
+        if (!Number.isInteger(ticketId) || ticketId <= 0){
+            return res.status(400).json({error: 'Invalid ticket id'});
+        }
+
+        const checkRole = await db.get(`SELECT role FROM users WHERE id = ?`, [userId]);
+
+        if (checkRole.role === 'admin'){
+            const result = await db.run(
+                 `UPDATE tickets SET title = ?, body = ? WHERE id = ?`,
+                 [cleanTitle, cleanBody, ticketId]
+             );
+
+            if (result.changes === 0){
+                return res.status(404).json({error: 'Ticket not found'});
+            }
+            return res.json({ok: true});
+
+        } else if (checkRole.role === 'user'){
+            const result = await db.run(
+                `UPDATE tickets SET title = ?, body = ? WHERE 
+                id = ? AND user_id = ?`,
+                [cleanTitle, cleanBody, ticketId, userId]
+            );
+            
+            if (result.changes === 0){
+                return res.status(404).json({error: 'Ticket not found'});
+            }
+            return res.json({ok: true});
+        }
+
+    } catch (error){
         console.error(error);
         return res.status(500).json({error: 'Server failed. Please try again.'});
     }

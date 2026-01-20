@@ -28,6 +28,6 @@ CREATE TABLE IF NOT EXISTS notes (
     FOREIGN KEY (admin_id) REFERENCES users(id) ON DELETE CASCADE               
 );
 
--- Create a table for the admins and make sure that if an admin account is deleted, the notes of that admin is not deleted. 
+
 
 
