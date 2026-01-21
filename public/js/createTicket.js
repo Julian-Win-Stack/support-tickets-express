@@ -18,7 +18,6 @@ createTicketForm.addEventListener('submit',async(e)=>{
             },
             body: JSON.stringify({title, body}),
         });
-        console.log(res)
 
         const data = await res.json();
 

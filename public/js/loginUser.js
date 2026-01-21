@@ -27,10 +27,7 @@ loginForm.addEventListener('submit', async(e)=>{
     const data = await res.json();
 
     if (res.ok){
-        loginName.textContent = `Welcome ${data.name} (${data.role})`;
-        loginStatus.textContent = `Login successful`;
-        logoutBtn.style.display = 'block';
-        topLoginStatus.textContent = 'Logged in';
+        window.location.reload();
     }else {
         loginStatus.textContent = data.error || 'Login failed. Please try again.';
     }

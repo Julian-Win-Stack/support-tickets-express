@@ -120,9 +120,9 @@
             <button class="btn btn-ghost" type="button">Refresh</button>
           </div>
 
-          <div class="tickets">
+          <div class="tickets" id="ticket-render-area">
             <!-- Example ticket cards (JS will render real ones) -->
-            <article class="ticket">
+            <!-- <article class="ticket">
               <div class="ticket-top">
                 <div class="ticket-title">
                   <span class="mono">#12</span>
@@ -135,9 +135,9 @@
               <div class="ticket-actions">
                 <button class="btn btn-ghost" type="button">Open</button>
               </div>
-            </article>
+            </article> -->
 
-            <article class="ticket">
+            <!-- <article class="ticket">
               <div class="ticket-top">
                 <div class="ticket-title">
                   <span class="mono">#11</span>
@@ -150,10 +150,10 @@
               <div class="ticket-actions">
                 <button class="btn btn-ghost" type="button">Open</button>
               </div>
-            </article>
+            </article> -->
           </div>
 
-          <div class="hint">Total: 0 (showing 0) — JS will update this.</div>
+          <div class="hint" id="ticket-count-area">Total: 0 (showing 0)</div>
         </div>
 
         <!-- Ticket detail -->
@@ -230,5 +230,6 @@
     <script src="./js/loginUser.js" type="module"></script>
     <script src="./js/logoutUser.js" type="module"></script>
      <script src="./js/createTicket.js" type="module"></script>
+     <script src="./js/ticket.js" type="module"></script>
   </body>
 </html>

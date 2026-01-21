@@ -21,10 +21,7 @@ logoutBtn.addEventListener('click', async()=>{
         const data = await res.json();
 
         if (res.ok){
-            loginStatus.textContent = 'User logged out';
-            loginName.textContent = '';
-            topLoginStatus.textContent = 'Not logged in';
-            logoutBtn.style.display = 'none';
+            window.location.reload();
         } else {
             loginStatus.textContent = data.error || 'Failed to logout. Please try again.';
         }

@@ -64,7 +64,7 @@ export async function getTickets(req,res) {
         }
 
         const mainSqliteCode = 
-                [`SELECT T.*, U.email 
+                [`SELECT T.*, U.email, U.name
                 FROM tickets T
                 JOIN users U ON T.user_id = U.id`];
         
