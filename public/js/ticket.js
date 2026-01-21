@@ -1,3 +1,5 @@
+// check whether you can still save the changes to the ticket even if you didn't make any changes. 
+
 const ticketRenderArea = document.getElementById('ticket-render-area');
 const ticketCountArea = document.getElementById('ticket-count-area');
 const selectStatus = document.getElementById('select-status');

@@ -170,11 +170,19 @@
                 <div class="ticket-meta" id="selected-ticket-upadate-time">Updated: Jan 16, 2026</div>
               </div>
 
-              <div class="detail-actions">
-                <button class="btn btn-ghost" type="button">Mark resolved</button>
-                <button class="btn btn-ghost" type="button">Set in_progress</button>
-                <button class="btn btn-ghost" type="button">Set open</button>
+              <div class="detail-actions" role="radiogroup" aria-label="Set ticket status">
+                <input class="status-radio" type="radio" name="ticket-status" id="status-resolved" value="resolved">
+                <label class="status-pill" for="status-resolved">Mark resolved</label>
+
+                <input class="status-radio" type="radio" name="ticket-status" id="status-inprogress" value="in_progress">
+                <label class="status-pill" for="status-inprogress">Set in_progress</label>
+
+                <input class="status-radio" type="radio" name="ticket-status" id="status-open" value="open">
+                <label class="status-pill" for="status-open">Set open</label>
               </div>
+
+
+
             </div>
             <!-- start from here. you will have to add the function to edit the tickets. If it is admin, the above btns are displayed and if user, display is removed. also post the results to the backend. 
              Update the status after the admin clicking 'save edits. and also update the update time. ' -->

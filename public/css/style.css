@@ -251,11 +251,60 @@ textarea{
   align-items: center;
 }
 
+/* ===== Status (radio) segmented control ===== */
 .detail-actions{
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+  display: inline-flex;
+  gap: 0;
+  flex-wrap: nowrap;
+  border: 1px solid var(--border2);
+  background: var(--panel2);
+  border-radius: 999px;
+  overflow: hidden;
 }
+
+/* Hide the real radio inputs */
+.status-radio{
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
+
+/* The clickable “button” is the label */
+.status-pill{
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  color: var(--muted2);
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  user-select: none;
+}
+
+/* separators between segments */
+.status-pill + .status-radio + .status-pill{
+  border-left: 1px solid var(--border2);
+}
+
+.status-pill:hover{
+  filter: brightness(1.12);
+  color: var(--text);
+}
+
+/* Active segment (radio checked) */
+.status-radio:checked + .status-pill{
+  background: #1c2a47;
+  color: var(--text);
+}
+
+/* Keyboard focus ring (tab to it) */
+.status-radio:focus-visible + .status-pill{
+  outline: 2px solid #2a3b62;
+  outline-offset: -2px;
+}
+
 
 .divider{
   border: none;
