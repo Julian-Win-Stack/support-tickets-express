@@ -9,7 +9,11 @@ export async function createNotes(req,res) {
 
         const isAdminRow = await db.get(`SELECT role FROM users WHERE id = ?`, [userId]);
 
-        if (isAdminRow.role !== 'admin' || !isAdminRow){
+        if (!isAdminRow){
+            return res.status(401).json({ error: 'Unauthorized. Please log in again.'});
+        }
+
+        if (isAdminRow.role !== 'admin'){
             return res.status(403).json({error: 'Forbidden! Only admins are allowed to add notes.'});
         }
 
@@ -28,15 +32,13 @@ export async function createNotes(req,res) {
 
         const numberedTicketId = Number(cleanTicketId);
 
-        if (!Number.isInteger(numberedTicketId) || Number.isNaN(numberedTicketId) || numberedTicketId < 1){
+        if (!Number.isInteger(numberedTicketId) || numberedTicketId < 1){
             return res.status(400).json({error: 'Invalid TicketId!'});
         }
 
         const wordCountLimit = 350;
 
         const wordCount = getWordCount(cleanBody);
-
-        console.log(wordCount);
 
         if (wordCount > wordCountLimit){
             return res.status(400).json({error: 'Word count for the note should be no more than 350 words'});
@@ -62,21 +64,17 @@ export async function getNotes(req,res) {
     const userId = req.session.userId;
     const isAdminRow = await db.get(`SELECT role FROM users WHERE id = ?`, [userId]);
 
-    if (isAdminRow.role !== 'admin' || !isAdminRow){
-        return res.status(403).json({error: 'Forbidden! Only admins are allowed to add notes.'});
+    if (!isAdminRow){
+        return res.status(401).json({ error: 'Unauthorized. Please log in again.'});
     }
 
-    const { id = '' } = req.params;
-
-    const cleanId = id.trim();
-
-    if (!cleanId){
-        return res.status(400).json({error: 'Missing TicketId!'});
+    if (isAdminRow.role !== 'admin'){
+        return res.status(403).json({error: 'Forbidden! Only admins are allowed to notes.'});
     }
 
-    const numberedId = Number(cleanId);
+    const numberedId = Number(req.params.id);
 
-    if (!Number.isInteger(numberedId) || Number.isNaN(numberedId) || numberedId < 1){
+    if (!Number.isInteger(numberedId) || numberedId < 1){
         return res.status(400).json({error: 'Invalid TicketId!'});
     }   
 
@@ -88,8 +86,7 @@ export async function getNotes(req,res) {
         WHERE N.ticket_id = ?
         `, [numberedId]
     );
-
-    console.log(notesArray);
+    
     return res.json({data: notesArray});
     
 }

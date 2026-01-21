@@ -59,6 +59,10 @@ export async function getTickets(req,res) {
             [userId]
         );
 
+        if (!roleRow){
+            return res.status(401).json({error: 'Invalid user'});
+        }
+
         const mainSqliteCode = 
                 [`SELECT T.*, U.email 
                 FROM tickets T
@@ -92,7 +96,6 @@ export async function getTickets(req,res) {
                 
                 mainSqliteCode.push(joinSqliteCode[0]);
                 const finalMainSqliteCode = mainSqliteCode.join(' ');
-                console.log('admin 1 => ', finalMainSqliteCode)
                 const ticketArray = await db.all(finalMainSqliteCode, userInput);
                 return res.json({data: ticketArray, totalTicket: numberOfTotalTicket, ticketsShown: ticketArray.length});
             }
@@ -102,7 +105,6 @@ export async function getTickets(req,res) {
                 const finalJoinSqliteCode = joinSqliteCode.join(' AND ');
                 mainSqliteCode.push(finalJoinSqliteCode);
                 const finalMainSqliteCode = mainSqliteCode.join(' ');
-                console.log('admin 2 => ', finalMainSqliteCode)
                 const ticketArray = await db.all(finalMainSqliteCode, userInput);
                 return res.json({data: ticketArray, totalTicket: numberOfTotalTicket, ticketsShown: ticketArray.length});
             }
@@ -176,7 +178,7 @@ export async function getTicketsById(req,res) {
        
         const ticketId = Number(req.params.id);
 
-        if (!Number.isInteger(ticketId)){
+        if (!Number.isInteger(ticketId) || ticketId < 1){
             return res.status(400).json({error: 'Invalid ticket id'});
         }
 
@@ -222,6 +224,12 @@ export async function updateTicketsTitle_Body(req,res) {
         const db = await getDBConnection();
         const userId = req.session.userId;
 
+        const checkRole = await db.get(`SELECT role FROM users WHERE id = ?`, [userId]);
+        
+        if (!checkRole){
+            return res.status(401).json({error: 'Invalid user!'});
+        }
+
         const { title = '', body = '' } = req.body;
 
         const cleanTitle = title.trim();
@@ -237,7 +245,6 @@ export async function updateTicketsTitle_Body(req,res) {
             return res.status(400).json({error: 'Invalid ticket id'});
         }
 
-        const checkRole = await db.get(`SELECT role FROM users WHERE id = ?`, [userId]);
 
         if (checkRole.role === 'admin'){
             const result = await db.run(
