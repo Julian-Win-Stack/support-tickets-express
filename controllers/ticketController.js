@@ -1,5 +1,3 @@
-// for getTickets function, we will have to send the number of tickets found to the frontend
-
 import { getDBConnection } from '../db/db.js';
 import { getWordCount } from '../BackendHelper/getWordCount.js';
 

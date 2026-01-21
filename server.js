@@ -6,6 +6,7 @@ import { fileURLToPath } from "url";
 import { initDB } from './db/initDB.js';
 import { authRouter } from './routes/authRouter.js';
 import { ticketRouter } from './routes/ticketRouter.js';
+import { notesRouter } from './routes/notesRouter.js';
 
 const app = express();
 const PORT = 3000;
@@ -45,6 +46,8 @@ app.get('/api/health', (req,res)=>{
 app.use('/api/auth', authRouter);
 
 app.use('/api/ticket', ticketRouter);
+
+app.use('/api/notes', notesRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
