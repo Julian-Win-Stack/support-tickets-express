@@ -1,10 +1,10 @@
 import { getDBConnection } from "./db/db.js";
-const tableName = 'notes';
+const tableName = 'tickets';
 
 async function logTable() {
     const db = await getDBConnection();
     try{
-        const table = await db.all(`SELECT ticket_id FROM ${tableName}`);
+        const table = await db.all(`SELECT * FROM ${tableName}`);
         console.table(table);
 
     }catch(err){

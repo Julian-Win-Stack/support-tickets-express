@@ -78,22 +78,22 @@
         <div class="card">
           <h2>Create Ticket</h2>
 
-          <form class="stack">
+          <form class="stack" id="create-ticket-form">
             <label class="field">
               <span class="label">Title</span>
-              <input name="title" placeholder="Short summary" />
+              <input name="title" placeholder="Short summary" id="create-ticket-title-area"/>
             </label>
 
             <label class="field">
               <span class="label">Body</span>
-              <textarea name="body" placeholder="Describe your issue…"></textarea>
+              <textarea name="body" placeholder="Describe your issue…" id="create-ticket-body-area"></textarea>
             </label>
 
-            <button class="btn" type="submit">Create</button>
+            <button class="btn" type="submit" id="create-ticket-btn">Create</button>
           </form>
 
-          <div class="msg" role="status" aria-live="polite">
-            Create-ticket status will show here.
+          <div class="msg" role="status" aria-live="polite" id="create-ticket-status-area">
+            
           </div>
         </div>
 
@@ -229,5 +229,6 @@
     <script src="./js/registerUser.js" type="module"></script>
     <script src="./js/loginUser.js" type="module"></script>
     <script src="./js/logoutUser.js" type="module"></script>
+     <script src="./js/createTicket.js" type="module"></script>
   </body>
 </html>

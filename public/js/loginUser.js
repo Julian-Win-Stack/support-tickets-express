@@ -3,13 +3,11 @@ const loginStatus = document.getElementById('login-status');
 const loginName = document.getElementById('login-name');
 const loginBtn = document.getElementById('login-btn');
 const logoutBtn = document.getElementById('logout-btn');
+const loginEmailRaw = document.getElementById('login-email');
+const loginPasswordRaw = document.getElementById('login-password');
 
 loginForm.addEventListener('submit', async(e)=>{
     e.preventDefault();
-
-    const loginEmailRaw = document.getElementById('login-email');
-    const loginPasswordRaw = document.getElementById('login-password');
-
     loginBtn.disabled = true;
 
     const loginEmail = loginEmailRaw.value.trim();
