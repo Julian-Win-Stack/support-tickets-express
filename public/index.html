@@ -81,12 +81,12 @@
           <form class="stack" id="create-ticket-form">
             <label class="field">
               <span class="label">Title</span>
-              <input name="title" placeholder="Short summary" id="create-ticket-title-area"/>
+              <input name="title" placeholder="Short summary" id="create-ticket-title-area" required/>
             </label>
 
             <label class="field">
               <span class="label">Body</span>
-              <textarea name="body" placeholder="Describe your issue…" id="create-ticket-body-area"></textarea>
+              <textarea name="body" placeholder="Describe your issue…" id="create-ticket-body-area" required></textarea>
             </label>
 
             <button class="btn" type="submit" id="create-ticket-btn">Create</button>
@@ -104,7 +104,7 @@
           <div class="row">
             <label class="field inline">
               <span class="label">Status</span>
-              <select>
+              <select id="select-status">
                 <option value="">All</option>
                 <option value="open">open</option>
                 <option value="in_progress">in_progress</option>
@@ -114,10 +114,10 @@
 
             <label class="field inline grow">
               <span class="label">Search</span>
-              <input placeholder="Search title/body…" />
+              <input placeholder="Search title/body…" id="search-bar"/>
             </label>
 
-            <button class="btn btn-ghost" type="button">Refresh</button>
+            <button class="btn btn-ghost" type="button" id="refersh-btn">Refresh</button>
           </div>
 
           <div class="tickets" id="ticket-render-area">

@@ -1,7 +1,26 @@
 const ticketRenderArea = document.getElementById('ticket-render-area');
 const ticketCountArea = document.getElementById('ticket-count-area');
+const selectStatus = document.getElementById('select-status');
+const searchBar = document.getElementById('search-bar');
+const refreshBtn = document.getElementById('refersh-btn');
 
 // set up eventlisteners for selecting status and typing in the search bar
+selectStatus.addEventListener('change', eventHandler);
+searchBar.addEventListener('input', eventHandler);
+refreshBtn.addEventListener('click', ()=>{
+    selectStatus.value = '';
+    searchBar.value = '';
+    eventHandler();
+})
+
+// functions
+
+async function eventHandler(){
+    const statusValue = selectStatus.value;
+    const searchValue = searchBar.value;
+    const data = await getTickets(statusValue, searchValue)
+    renderTickets(data)
+}
 
 export function renderTickets(data) {
     let finalString = '';
