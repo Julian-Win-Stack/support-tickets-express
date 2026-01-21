@@ -1,5 +1,6 @@
 const loginForm = document.getElementById('login-form');
 const loginStatus = document.getElementById('login-status');
+const topLoginStatus = document.getElementById('top-login-status');
 const loginName = document.getElementById('login-name');
 const loginBtn = document.getElementById('login-btn');
 const logoutBtn = document.getElementById('logout-btn');
@@ -29,6 +30,7 @@ loginForm.addEventListener('submit', async(e)=>{
         loginName.textContent = `Welcome ${data.name} (${data.role})`;
         loginStatus.textContent = `Login successful`;
         logoutBtn.style.display = 'block';
+        topLoginStatus.textContent = 'Logged in';
     }else {
         loginStatus.textContent = data.error || 'Login failed. Please try again.';
     }

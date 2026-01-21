@@ -3,6 +3,7 @@ const loginStatus = document.getElementById('login-status');
 const loginBtn = document.getElementById('login-btn');
 const registerBtn = document.getElementById('register-btn');
 const loginName = document.getElementById('login-name');
+const topLoginStatus = document.getElementById('top-login-status');
 
 logoutBtn.addEventListener('click', async()=>{
     console.log('btn clicked')
@@ -22,6 +23,7 @@ logoutBtn.addEventListener('click', async()=>{
         if (res.ok){
             loginStatus.textContent = 'User logged out';
             loginName.textContent = '';
+            topLoginStatus.textContent = 'Not logged in';
             logoutBtn.style.display = 'none';
         } else {
             loginStatus.textContent = data.error || 'Failed to logout. Please try again.';
