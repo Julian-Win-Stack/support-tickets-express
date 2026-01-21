@@ -4,14 +4,44 @@ const selectStatus = document.getElementById('select-status');
 const searchBar = document.getElementById('search-bar');
 const refreshBtn = document.getElementById('refersh-btn');
 
-// set up eventlisteners for selecting status and typing in the search bar
+// eventlisteners
+
+document.addEventListener('click', async(e)=>{
+    if (e.target.classList.contains('select-ticket-btns')){
+        try{
+            const ticketId = e.target.dataset.ticketId;
+            const res = await fetch(`/api/ticket/${ticketId}`, {credentials: 'include'});
+            const data = await res.json();
+
+            if (res.ok){
+                document.getElementById('selected-ticket-id').textContent = `Ticket #${data.data.id}`
+                document.getElementById('selected-ticket-status').textContent = `${data.data.status}`
+                document.getElementById('selected-ticket-upadate-time').textContent = `Updated: ${data.data.updated_at}`
+                document.getElementById('selected-ticket-title').value = `${data.data.title}`
+                document.getElementById('selected-ticket-body').value = `${data.data.body}`
+            } else{
+                throw new Error(data.error || 'Fetch for getTicketById failed!');
+            }
+
+        }catch (error){
+            console.error(error);
+        }
+    }
+})
+
 selectStatus.addEventListener('change', eventHandler);
+
 searchBar.addEventListener('input', eventHandler);
+
 refreshBtn.addEventListener('click', ()=>{
     selectStatus.value = '';
     searchBar.value = '';
     eventHandler();
 })
+
+
+
+
 
 // functions
 
@@ -39,7 +69,7 @@ export function renderTickets(data) {
               <div class="ticket-meta">Owner: ${ticket.name} (${ticket.email})</div>
               <div class="ticket-meta">Created: ${ticket.created_at}</div>
               <div class="ticket-actions">
-                <button class="btn btn-ghost" type="button">Open</button>
+                <button class="btn btn-ghost select-ticket-btns" type="button" data-ticket-id="${ticket.id}">Open</button>
               </div>
             </article>`
         });

@@ -164,10 +164,10 @@
             <div class="detail-header">
               <div>
                 <div class="detail-title">
-                  <strong>Ticket #12</strong>
-                  <span class="badge">open</span>
+                  <strong id="selected-ticket-id">Ticket #12</strong>
+                  <span class="badge" id="selected-ticket-status">open</span>
                 </div>
-                <div class="ticket-meta">Updated: Jan 16, 2026</div>
+                <div class="ticket-meta" id="selected-ticket-upadate-time">Updated: Jan 16, 2026</div>
               </div>
 
               <div class="detail-actions">
@@ -180,12 +180,12 @@
             <div class="stack">
               <label class="field">
                 <span class="label">Title</span>
-                <input value="Checkout page fails" />
+                <input value="Checkout page fails" id="selected-ticket-title" required/>
               </label>
 
               <label class="field">
                 <span class="label">Body</span>
-                <textarea>When I click Pay, I get a 500 error.</textarea>
+                <textarea id="selected-ticket-body" required>When I click Pay, I get a 500 error.</textarea>
               </label>
 
               <button class="btn" type="button">Save edits</button>
