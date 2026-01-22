@@ -6,10 +6,10 @@ const loginName = document.getElementById('login-name');
 const topLoginStatus = document.getElementById('top-login-status');
 
 logoutBtn.addEventListener('click', async()=>{
-    console.log('btn clicked')
     logoutBtn.disabled = true;
     loginBtn.disabled = true;
     registerBtn.disabled = true;
+    
     try{
         const res = await fetch('/api/auth/logout',{
             method: 'POST',
@@ -23,12 +23,12 @@ logoutBtn.addEventListener('click', async()=>{
         if (res.ok){
             window.location.reload();
         } else {
-            loginStatus.textContent = data.error || 'Failed to logout. Please try again.';
+            throw new Error (data.error || 'Failed to logout. Please try again.');
         }
 
     } catch (error){
+        loginStatus.textContent = error;
         console.error(error);
-        loginStatus.textContent = 'Unable to connect. Please try again.';
 
     } finally{
         loginBtn.disabled = false;

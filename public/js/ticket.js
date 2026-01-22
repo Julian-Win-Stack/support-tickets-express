@@ -1,31 +1,107 @@
-// check whether you can still save the changes to the ticket even if you didn't make any changes. 
+// may be remove the DOM names that you used for only once? Organize the DOM. change the names and use El and Input for the const variable names. 
+// I added clear admin and user permissions on the lastest frontend endpoints and on :id backend endpoints. 
+// show appropriate error messages on the page. 
+import { getRole } from './getRole.js';
 
+let clickedTicketId;
 const ticketRenderArea = document.getElementById('ticket-render-area');
 const ticketCountArea = document.getElementById('ticket-count-area');
 const selectStatus = document.getElementById('select-status');
 const searchBar = document.getElementById('search-bar');
 const refreshBtn = document.getElementById('refersh-btn');
+const editTicketBtn = document.getElementById('edit-ticket-btn');
+const saveEditStatusEl = document.getElementById('save-edit-status');
+
+// state
+await toggleStatusRadio();
+
 
 // eventlisteners
+editTicketBtn.addEventListener('click', async()=>{
+    const data = await getRole();
+    const selectedRadio = document.querySelector('input[name="ticket-status"]:checked');
+    const titleInput = document.getElementById('selected-ticket-title');
+    const bodyInput = document.getElementById('selected-ticket-body');
+    const title = titleInput.value;
+    const body = bodyInput.value;
+    
+    let sendData = {};
+
+    if (data.role === 'admin'){
+        const status = selectedRadio ? selectedRadio.value : '';
+        sendData = {status};
+
+    } else if (data.role === 'user'){
+        sendData = {title, body};
+    }
+
+    try{
+        const res = await fetch(`/api/ticket/${clickedTicketId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify(sendData)
+        });
+
+        const data = await res.json();
+
+        if (res.ok){
+
+            if (data.role === 'user'){
+                titleInput.value = data.data.title;
+                bodyInput.value = data.data.body;
+            } else if (data.role === 'admin'){
+                document.getElementById('admin-view-title').textContent = data.data.title;
+                document.getElementById('admin-view-body').textContent = data.data.body;
+            }
+            
+            document.getElementById('selected-ticket-status').textContent = data.data.status;
+            document.getElementById('selected-ticket-upadate-time').textContent = data.data.updated_at;
+            eventHandler();
+            saveEditStatusEl.textContent = 'Edits saved';
+
+        } else {
+            throw new Error (data.error || 'Fetch for updating ticket failed!');
+        }
+
+    }catch (error){
+        saveEditStatusEl.textContent = error;
+        console.error(error);
+    }
+
+})
+
 
 document.addEventListener('click', async(e)=>{
     if (e.target.classList.contains('select-ticket-btns')){
         try{
-            const ticketId = e.target.dataset.ticketId;
-            const res = await fetch(`/api/ticket/${ticketId}`, {credentials: 'include'});
+            clickedTicketId = e.target.dataset.ticketId;
+            const res = await fetch(`/api/ticket/${clickedTicketId}`, {credentials: 'include'});
             const data = await res.json();
 
             if (res.ok){
                 document.getElementById('selected-ticket-id').textContent = `Ticket #${data.data.id}`
-                document.getElementById('selected-ticket-status').textContent = `${data.data.status}`
+                document.getElementById('selected-ticket-status').textContent = data.data.status;
                 document.getElementById('selected-ticket-upadate-time').textContent = `Updated: ${data.data.updated_at}`
-                document.getElementById('selected-ticket-title').value = `${data.data.title}`
-                document.getElementById('selected-ticket-body').value = `${data.data.body}`
+
+                const roleData = await getRole();
+                if (roleData.role === 'user'){
+                    document.getElementById('selected-ticket-title').value = data.data.title;
+                    document.getElementById('selected-ticket-body').value = data.data.body;
+
+                } else if (roleData.role === 'admin'){
+                    document.getElementById('admin-view-title').textContent = data.data.title;
+                    document.getElementById('admin-view-body').textContent = data.data.body;
+
+                }
             } else{
                 throw new Error(data.error || 'Fetch for getTicketById failed!');
             }
 
         }catch (error){
+            document.getElementById('select-ticket-err-msg').textContent = error;
             console.error(error);
         }
     }
@@ -112,7 +188,6 @@ export async function getTickets(status, search) {
         finalFetchEndpoint = fetchEndpointArray[0];
     }
 
-
     try{
         const res = await fetch(finalFetchEndpoint, {credentials: 'include'});
 
@@ -124,10 +199,23 @@ export async function getTickets(status, search) {
         return data
 
     } catch (error){
+        document.getElementById('filter-tickets-error').textContent = error;
         console.error(error);
         return {
             data: []
         }
     }
-    
 }
+
+async function toggleStatusRadio() {
+    const data = await getRole();
+    const role = data.role;
+
+    if (role === 'user'){
+        document.getElementById('status-radios').style.display = 'none';
+        document.getElementById('edit-admin-area').style.display = 'none';
+    } else if (role === 'admin'){
+        document.getElementById('edit-user-area').style.display = 'none';
+    }
+}
+

@@ -236,10 +236,18 @@ export async function updateTicketsTitle_Body_Status(req,res) {
         const cleanBody = body.trim();
         const cleanStatus = status.trim();
 
-        if (!cleanTitle || !cleanBody || !cleanStatus){
-            return res.status(400).json({error: 'Missing fields'});
+        if (checkRole.role === 'user' && cleanStatus){
+            return res.status(403).json({error: 'Forbidden. User trying to update status.'});
         }
-    
+
+        if (checkRole.role === 'admin' && (cleanTitle || cleanBody)){
+            return res.status(403).json({error: 'Forbidden. Admin trying to change title and body.'});
+        }
+
+        if (checkRole.role === 'admin' && !cleanStatus){
+            return res.status(400).json({error: 'No changes made'});
+        }
+
         const ticketId = Number(req.params.id);
         
         if (!Number.isInteger(ticketId) || ticketId <= 0){
@@ -260,15 +268,22 @@ export async function updateTicketsTitle_Body_Status(req,res) {
                 return res.status(404).json({error: 'Ticket not found'});
             }
 
-            const result = await db.run(
-                 `UPDATE tickets SET title = ?, body = ?, status = ? WHERE id = ?`,
-                 [cleanTitle, cleanBody, cleanStatus, ticketId]
+            await db.run(
+                `UPDATE tickets
+                SET status = ?,
+                updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?`,
+                 [cleanStatus, ticketId]
              );
 
-            if (result.changes === 0){
-                return res.status(404).json({error: 'Ticket not found'});
-            }
-            return res.json({ok: true});
+            const updatedValue = await db.get(
+                `SELECT * 
+                FROM tickets
+                WHERE id = ?
+                `, [ticketId]
+            );
+
+            return res.json({ok: true, data:updatedValue});
 
         } else if (checkRole.role === 'user'){
 
@@ -284,13 +299,24 @@ export async function updateTicketsTitle_Body_Status(req,res) {
                 return res.status(404).json({error: 'Ticket not found'});
             }
 
-            const result = await db.run(
-                `UPDATE tickets SET title = ?, body = ? WHERE 
-                id = ? AND user_id = ?`,
+            await db.run(
+                `UPDATE tickets 
+                SET title = ?, 
+                body = ?, 
+                updated_at = CURRENT_TIMESTAMP
+                WHERE id = ? 
+                AND user_id = ?`,
                 [cleanTitle, cleanBody, ticketId, userId]
             );
+
+            const updatedValue = await db.get(
+                `SELECT * 
+                FROM tickets
+                WHERE id = ? AND user_id = ?
+                `, [ticketId, userId]
+            );
             
-            return res.json({ok: true});
+            return res.json({ok: true, data: updatedValue});
         }
 
     } catch (error){

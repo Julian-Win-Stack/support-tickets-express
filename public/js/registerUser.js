@@ -27,10 +27,10 @@ registerForm.addEventListener('submit', async(e)=>{
 
     const data = await res.json();
 
-    if (!res.ok){
-        registerMessage.textContent = data.error || 'Registration failed. Please try again.';
-    } else {
+    if (res.ok){
         registerMessage.textContent = 'Registration succeed';
+    } else {
+        throw new Error(data.error || 'Registration failed. Please try again.');
     }
 
     registerNameRaw.value = '';
@@ -39,8 +39,8 @@ registerForm.addEventListener('submit', async(e)=>{
 
 
     }catch (error){
+        registerMessage.textContent = error;
         console.error(error);
-        registerMessage.textContent = 'Unable to connect. Please try again. '
     }finally{
         registerBtn.disabled = false;
     }

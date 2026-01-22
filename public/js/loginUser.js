@@ -29,12 +29,12 @@ loginForm.addEventListener('submit', async(e)=>{
     if (res.ok){
         window.location.reload();
     }else {
-        loginStatus.textContent = data.error || 'Login failed. Please try again.';
+        throw new Error (data.error || 'Login failed. Please try again.');
     }
 
     } catch (error){
+        loginStatus.textContent = error;
         console.error(error);
-        loginStatus.textContent = 'Unable to connect. Please try again.';
     } finally {
         loginBtn.disabled = false;
         loginEmailRaw.value = '';

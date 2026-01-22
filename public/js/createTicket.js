@@ -24,13 +24,14 @@ createTicketForm.addEventListener('submit',async(e)=>{
         if (res.ok){
             ticketStatusArea.textContent = 'Ticket created';
         } else{
-            ticketStatusArea.textContent = data.error || 'Action failed. Please try again';
+            throw new Error (data.error || 'Action failed. Please try again');
         }
 
         titleArea.value = '';
         bodyArea.value = '';
 
     }catch(error){
+        ticketStatusArea.textContent = error;
         console.error(error);
     }finally{
         createTicketBtn.disabled = false;    

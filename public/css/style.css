@@ -338,3 +338,44 @@ textarea{
   .span2{ grid-column: span 1; }
   .me{ min-width: 0; }
 }
+
+/* ===== View-only fields (admin area) ===== */
+/* matches input/textarea/select look */
+.view-field{
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #263557;
+  background: var(--panel2);
+  color: var(--text);
+  outline: none;
+  font-size: 14px;
+  line-height: 1.35;
+
+  /* behave like text, but still selectable */
+  user-select: text;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* make body feel like textarea height */
+.view-field--textarea{
+  min-height: 90px;
+}
+
+/* optional: if you want admin area to be clearly non-editable */
+#edit-admin-area .view-field{
+  cursor: default;
+}
+
+
+/* ===== Admin view text alignment ===== */
+#edit-admin-area .view-field{
+  text-align: left;
+}
+
+/* Force admin view text to start from the left no matter what */
+#edit-admin-area .view-field{
+  display: block !important;
+  text-align: left !important;
+}

@@ -10,7 +10,7 @@ async function init() {
         const res = await fetch('/api/auth/me', {credentials: 'include'});
         const data = await res.json();
     
-        if (data.ok){
+        if (res.ok){
             const name = data.name;
             const role = data.role;
             loginName.textContent = `Welcome ${name} (${role})`;

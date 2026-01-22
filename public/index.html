@@ -47,7 +47,7 @@
             </label>
 
             <button class="btn" type="submit" id="register-btn">Register</button>
-            <div class="hint" id="register-message">After register, you can auto-login (handled by JS).</div>
+            <div class="msg" role="status" aria-live="polite" id="register-message"></div>
           </form>
 
           <form class="stack" autocomplete="on" id="login-form">
@@ -154,6 +154,7 @@
           </div>
 
           <div class="hint" id="ticket-count-area">Total: 0 (showing 0)</div>
+          <div class="msg" role="status" aria-live="polite" id="filter-tickets-error"></div>
         </div>
 
         <!-- Ticket detail -->
@@ -164,13 +165,16 @@
             <div class="detail-header">
               <div>
                 <div class="detail-title">
-                  <strong id="selected-ticket-id">Ticket #12</strong>
-                  <span class="badge" id="selected-ticket-status">open</span>
+                  <strong id="selected-ticket-id"></strong>
+                  <!-- Ticket #12 -->
+                  <span class="badge" id="selected-ticket-status"></span>
+                  <!-- open -->
                 </div>
-                <div class="ticket-meta" id="selected-ticket-upadate-time">Updated: Jan 16, 2026</div>
+                <div class="ticket-meta" id="selected-ticket-upadate-time"></div>
+                <!-- Updated: Jan 16, 2026 -->
               </div>
 
-              <div class="detail-actions" role="radiogroup" aria-label="Set ticket status">
+              <div class="detail-actions" role="radiogroup" aria-label="Set ticket status" id="status-radios">
                 <input class="status-radio" type="radio" name="ticket-status" id="status-resolved" value="resolved">
                 <label class="status-pill" for="status-resolved">Mark resolved</label>
 
@@ -181,24 +185,35 @@
                 <label class="status-pill" for="status-open">Set open</label>
               </div>
 
-
-
             </div>
-            <!-- start from here. you will have to add the function to edit the tickets. If it is admin, the above btns are displayed and if user, display is removed. also post the results to the backend. 
-             Update the status after the admin clicking 'save edits. and also update the update time. ' -->
 
             <div class="stack">
-              <label class="field">
-                <span class="label">Title</span>
-                <input value="Checkout page fails" id="selected-ticket-title" required/>
-              </label>
+              <div id="edit-user-area">
+                <label class="field">
+                  <span class="label">Title</span>
+                  <input value="" id="selected-ticket-title" required/>
+                </label>
 
-              <label class="field">
-                <span class="label">Body</span>
-                <textarea id="selected-ticket-body" required>When I click Pay, I get a 500 error.</textarea>
-              </label>
+                <label class="field">
+                  <span class="label">Body</span>
+                  <textarea id="selected-ticket-body" required></textarea>
+                </label>
+              </div>
+              <div id="edit-admin-area">
+                <div class="field">
+                  <span class="label">Title</span>
+                  <div class="view-field" id="admin-view-title"></div>
+                </div>
 
-              <button class="btn" type="button">Save edits</button>
+                <div class="field">
+                  <span class="label">Body</span>
+                  <div class="view-field view-field--textarea" id="admin-view-body"></div>
+                </div>
+              </div>
+
+              <button class="btn" type="button" id="edit-ticket-btn">Save edits</button>
+              <div class="msg" role="status" aria-live="polite" id="select-ticket-err-msg"></div>
+              <div class="msg" role="status" aria-live="polite" id="save-edit-status"></div>
             </div>
 
             <hr class="divider" />
@@ -210,6 +225,7 @@
                 <textarea placeholder="Add internal note…"></textarea>
               </label>
               <button class="btn btn-ghost" type="button">Add note</button>
+              <div class="msg" role="status" aria-live="polite" id="add-note-status"></div>
             </div>
 
             <h3>Notes</h3>
