@@ -1,4 +1,3 @@
-// go and check other params and queries as well. 
 import { getDBConnection } from '../db/db.js';
 import { getWordCount } from '../BackendHelper/getWordCount.js';
 

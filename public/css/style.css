@@ -16,6 +16,8 @@
   --radius: 12px;
 }
 
+html, body { height: 100%; }
+
 body{
   margin: 0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
@@ -23,12 +25,14 @@ body{
   color: var(--text);
 }
 
+/* Slightly wider overall layout and better padding scaling */
 .container{
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 24px;
+  padding: clamp(16px, 2.5vw, 28px);
 }
 
+/* ===== Header ===== */
 .header{
   display: flex;
   justify-content: space-between;
@@ -65,9 +69,10 @@ h1{
 }
 
 /* ===== Layout ===== */
+/* Use minmax so 2-column happens only when there’s enough space */
 .grid{
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(320px, 1fr));
   gap: 16px;
   margin-top: 16px;
 }
@@ -305,7 +310,6 @@ textarea{
   outline-offset: -2px;
 }
 
-
 .divider{
   border: none;
   border-top: 1px solid var(--border);
@@ -333,14 +337,7 @@ textarea{
   margin-bottom: 6px;
 }
 
-@media (max-width: 900px){
-  .grid{ grid-template-columns: 1fr; }
-  .span2{ grid-column: span 1; }
-  .me{ min-width: 0; }
-}
-
 /* ===== View-only fields (admin area) ===== */
-/* matches input/textarea/select look */
 .view-field{
   width: 100%;
   padding: 10px 12px;
@@ -351,31 +348,73 @@ textarea{
   outline: none;
   font-size: 14px;
   line-height: 1.35;
-
-  /* behave like text, but still selectable */
   user-select: text;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 
-/* make body feel like textarea height */
 .view-field--textarea{
   min-height: 90px;
 }
 
-/* optional: if you want admin area to be clearly non-editable */
 #edit-admin-area .view-field{
   cursor: default;
-}
-
-
-/* ===== Admin view text alignment ===== */
-#edit-admin-area .view-field{
   text-align: left;
+  display: block;
 }
 
-/* Force admin view text to start from the left no matter what */
-#edit-admin-area .view-field{
-  display: block !important;
-  text-align: left !important;
+/* ===== Logged out (default) ===== */
+#admin-notes-section,
+#all-create-ticket-area,
+#ticket-list-area,
+#ticket-detail-area{
+  display: none;
+}
+
+/* Center auth card when logged out (bigger than 520px, responsive) */
+#auth-card{
+  grid-column: 1 / -1;                 /* span full grid width */
+  width: min(720px, 100%);             /* <- wider, but never overflow */
+  margin: clamp(12px, 4vh, 48px) auto 0;
+}
+
+body.is-logged-in #all-create-ticket-area,
+body.is-logged-in #ticket-list-area{
+  display: block;
+}
+
+/* Auth card goes back to normal position/size */
+body.is-logged-in #auth-card{
+  grid-column: auto;
+  width: auto;
+  margin: 0;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 900px){
+  .grid{ grid-template-columns: 1fr; }
+  .span2{ grid-column: span 1; }
+  .me{ min-width: 0; }
+}
+
+@media (max-width: 600px){
+  .header{
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .me{
+    width: 100%;
+  }
+
+  /* make segmented status control wrap nicely on tiny screens */
+  .detail-actions{
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .status-pill{
+    flex: 1;
+    text-align: center;
+  }
 }

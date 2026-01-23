@@ -9,6 +9,7 @@ const loginPasswordRaw = document.getElementById('login-password');
 
 loginForm.addEventListener('submit', async(e)=>{
     e.preventDefault();
+    console.log('login triggered')
     loginBtn.disabled = true;
 
     const loginEmail = loginEmailRaw.value.trim();

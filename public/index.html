@@ -22,32 +22,52 @@
 
       <section class="grid">
         <!-- Auth -->
-        <div class="card">
-          <h2>Auth</h2>
-
-          <div class="row">
-            <button class="btn btn-ghost" type="button">Seed admin</button>
-          </div>
+        <div class="card" id="auth-card">
 
           <form class="stack" autocomplete="on" id="register-form">
             <h3>Register</h3>
+
             <label class="field">
               <span class="label">Name</span>
-              <input name="name" placeholder="Your name" id="register-name" required/>
+              <input
+                name="name"
+                placeholder="Your name"
+                id="register-name"
+                required
+              />
             </label>
 
             <label class="field">
               <span class="label">Email</span>
-              <input name="email" placeholder="you@example.com" id="register-email" required/>
+              <input
+                name="email"
+                placeholder="you@example.com"
+                id="register-email"
+                required
+              />
             </label>
 
             <label class="field">
               <span class="label">Password</span>
-              <input name="password" type="password" placeholder="••••••••" id="register-password" required/>
+              <input
+                name="password"
+                type="password"
+                placeholder="••••••••"
+                id="register-password"
+                required
+              />
             </label>
 
-            <button class="btn" type="submit" id="register-btn">Register</button>
-            <div class="msg" role="status" aria-live="polite" id="register-message"></div>
+            <button class="btn" type="submit" id="register-btn">
+              Register
+            </button>
+
+            <div
+              class="msg"
+              role="status"
+              aria-live="polite"
+              id="register-message"
+            ></div>
           </form>
 
           <form class="stack" autocomplete="on" id="login-form">
@@ -55,50 +75,84 @@
 
             <label class="field">
               <span class="label">Email</span>
-              <input name="email" placeholder="admin@local.dev" id="login-email"/>
+              <input
+                name="email"
+                placeholder="admin@local.dev"
+                id="login-email"
+              />
             </label>
 
             <label class="field">
               <span class="label">Password</span>
-              <input name="password" type="password" placeholder="admin1234" id="login-password"/>
+              <input
+                name="password"
+                type="password"
+                placeholder="admin1234"
+                id="login-password"
+              />
             </label>
 
-            <button class="btn" type="submit" id="login-btn">Login</button>
+            <button class="btn" type="submit" id="login-btn">
+              Login
+            </button>
+
             <div class="hint" id="login-name"></div>
           </form>
 
-          <button class="btn btn-danger" type="button" id="logout-btn">Logout</button>
+          <button class="btn btn-danger" type="button" id="logout-btn">
+            Logout
+          </button>
 
-          <div class="msg" role="status" aria-live="polite" id="login-status">
+          <div
+            class="msg"
+            role="status"
+            aria-live="polite"
+            id="login-status"
+          >
             Not logged in
           </div>
         </div>
 
         <!-- Create ticket -->
-        <div class="card">
+        <div class="card" id="all-create-ticket-area">
           <h2>Create Ticket</h2>
 
           <form class="stack" id="create-ticket-form">
             <label class="field">
               <span class="label">Title</span>
-              <input name="title" placeholder="Short summary" id="create-ticket-title-area" required/>
+              <input
+                name="title"
+                placeholder="Short summary"
+                id="create-ticket-title-area"
+                required
+              />
             </label>
 
             <label class="field">
               <span class="label">Body</span>
-              <textarea name="body" placeholder="Describe your issue…" id="create-ticket-body-area" required></textarea>
+              <textarea
+                name="body"
+                placeholder="Describe your issue…"
+                id="create-ticket-body-area"
+                required
+              ></textarea>
             </label>
 
-            <button class="btn" type="submit" id="create-ticket-btn">Create</button>
+            <button class="btn" type="submit" id="create-ticket-btn">
+              Create
+            </button>
           </form>
 
-          <div class="msg" role="status" aria-live="polite" id="create-ticket-status-area">
-            
-          </div>
+          <div
+            class="msg"
+            role="status"
+            aria-live="polite"
+            id="create-ticket-status-area"
+          ></div>
         </div>
 
         <!-- Tickets list -->
-        <div class="card span2">
+        <div class="card span2" id="ticket-list-area">
           <h2>Tickets</h2>
 
           <div class="row">
@@ -114,51 +168,37 @@
 
             <label class="field inline grow">
               <span class="label">Search</span>
-              <input placeholder="Search title/body…" id="search-bar"/>
+              <input
+                placeholder="Search title/body…"
+                id="search-bar"
+              />
             </label>
 
-            <button class="btn btn-ghost" type="button" id="refersh-btn">Refresh</button>
+            <button
+              class="btn btn-ghost"
+              type="button"
+              id="refresh-btn"
+            >
+              Refresh
+            </button>
           </div>
 
-          <div class="tickets" id="ticket-render-area">
-            <!-- Example ticket cards (JS will render real ones) -->
-            <!-- <article class="ticket">
-              <div class="ticket-top">
-                <div class="ticket-title">
-                  <span class="mono">#12</span>
-                  <strong>Checkout page fails</strong>
-                </div>
-                <span class="badge">open</span>
-              </div>
-              <div class="ticket-meta">Owner: Alex (alex@mail.com)</div>
-              <div class="ticket-meta">Created: Jan 16, 2026</div>
-              <div class="ticket-actions">
-                <button class="btn btn-ghost" type="button">Open</button>
-              </div>
-            </article> -->
+          <div class="tickets" id="ticket-render-area"></div>
 
-            <!-- <article class="ticket">
-              <div class="ticket-top">
-                <div class="ticket-title">
-                  <span class="mono">#11</span>
-                  <strong>Refund request</strong>
-                </div>
-                <span class="badge badge-muted">resolved</span>
-              </div>
-              <div class="ticket-meta">Owner: Sam (sam@mail.com)</div>
-              <div class="ticket-meta">Created: Jan 14, 2026</div>
-              <div class="ticket-actions">
-                <button class="btn btn-ghost" type="button">Open</button>
-              </div>
-            </article> -->
+          <div class="hint" id="ticket-count-area">
+            Total: 0 (showing 0)
           </div>
 
-          <div class="hint" id="ticket-count-area">Total: 0 (showing 0)</div>
-          <div class="msg" role="status" aria-live="polite" id="filter-tickets-error"></div>
+          <div
+            class="msg"
+            role="status"
+            aria-live="polite"
+            id="filter-tickets-error"
+          ></div>
         </div>
 
         <!-- Ticket detail -->
-        <div class="card span2">
+        <div class="card span2" id="ticket-detail-area">
           <h2>Ticket Detail</h2>
 
           <div class="detail">
@@ -166,32 +206,70 @@
               <div>
                 <div class="detail-title">
                   <strong id="selected-ticket-id"></strong>
-                  <!-- Ticket #12 -->
                   <span class="badge" id="selected-ticket-status"></span>
-                  <!-- open -->
                 </div>
-                <div class="ticket-meta" id="selected-ticket-upadate-time"></div>
-                <!-- Updated: Jan 16, 2026 -->
+
+                <div
+                  class="ticket-meta"
+                  id="selected-ticket-upadate-time"
+                ></div>
               </div>
 
-              <div class="detail-actions" role="radiogroup" aria-label="Set ticket status" id="status-radios">
-                <input class="status-radio" type="radio" name="ticket-status" id="status-resolved" value="resolved">
-                <label class="status-pill" for="status-resolved">Mark resolved</label>
+              <div
+                class="detail-actions"
+                role="radiogroup"
+                aria-label="Set ticket status"
+                id="status-radios"
+              >
+                <input
+                  class="status-radio"
+                  type="radio"
+                  name="ticket-status"
+                  id="status-resolved"
+                  value="resolved"
+                />
+                <label
+                  class="status-pill"
+                  for="status-resolved"
+                >
+                  Mark resolved
+                </label>
 
-                <input class="status-radio" type="radio" name="ticket-status" id="status-inprogress" value="in_progress">
-                <label class="status-pill" for="status-inprogress">Set in_progress</label>
+                <input
+                  class="status-radio"
+                  type="radio"
+                  name="ticket-status"
+                  id="status-inprogress"
+                  value="in_progress"
+                />
+                <label
+                  class="status-pill"
+                  for="status-inprogress"
+                >
+                  Set in_progress
+                </label>
 
-                <input class="status-radio" type="radio" name="ticket-status" id="status-open" value="open">
-                <label class="status-pill" for="status-open">Set open</label>
+                <input
+                  class="status-radio"
+                  type="radio"
+                  name="ticket-status"
+                  id="status-open"
+                  value="open"
+                />
+                <label
+                  class="status-pill"
+                  for="status-open"
+                >
+                  Set open
+                </label>
               </div>
-
             </div>
 
             <div class="stack">
               <div id="edit-user-area">
                 <label class="field">
                   <span class="label">Title</span>
-                  <input value="" id="selected-ticket-title" required/>
+                  <input id="selected-ticket-title" required />
                 </label>
 
                 <label class="field">
@@ -199,6 +277,7 @@
                   <textarea id="selected-ticket-body" required></textarea>
                 </label>
               </div>
+
               <div id="edit-admin-area">
                 <div class="field">
                   <span class="label">Title</span>
@@ -207,55 +286,73 @@
 
                 <div class="field">
                   <span class="label">Body</span>
-                  <div class="view-field view-field--textarea" id="admin-view-body"></div>
+                  <div
+                    class="view-field view-field--textarea"
+                    id="admin-view-body"
+                  ></div>
                 </div>
               </div>
 
-              <button class="btn" type="button" id="edit-ticket-btn">Save edits</button>
-              <div class="msg" role="status" aria-live="polite" id="select-ticket-err-msg"></div>
-              <div class="msg" role="status" aria-live="polite" id="save-edit-status"></div>
+              <button
+                class="btn"
+                type="button"
+                id="edit-ticket-btn"
+              >
+                Save edits
+              </button>
+
+              <div
+                class="msg"
+                role="status"
+                aria-live="polite"
+                id="select-ticket-err-msg"
+              ></div>
+
+              <div
+                class="msg"
+                role="status"
+                aria-live="polite"
+                id="save-edit-status"
+              ></div>
             </div>
 
             <hr class="divider" />
 
-            <h3>Internal notes (admin only)</h3>
-            <div class="stack">
-              <label class="field">
-                <span class="label">Add note</span>
-                <textarea placeholder="Add internal note…"></textarea>
-              </label>
-              <button class="btn btn-ghost" type="button">Add note</button>
-              <div class="msg" role="status" aria-live="polite" id="add-note-status"></div>
+            <div id="admin-notes-section">
+              <h3>Internal notes (admin only)</h3>
+
+              <form class="stack" id="note-submit-form">
+                <label class="field">
+                  <span class="label">Add note</span>
+                  <textarea placeholder="Add internal note…" required id="add-note-textarea"></textarea>
+                </label>
+
+                <button class="btn btn-ghost" type="submit" id="add-note-btn">
+                  Add note
+                </button>
+
+                <div
+                  class="msg"
+                  role="status"
+                  aria-live="polite"
+                  id="add-note-status"
+                ></div>
+              </form>
+
+              <h3 id="notes-heading"></h3>
+              <div class="notes" id="render-notes-area"></div>
             </div>
 
-            <h3>Notes</h3>
-            <div class="notes">
-              <div class="note">
-                <div class="note-top">
-                  <strong>Admin</strong>
-                  <span class="ticket-meta">Jan 16, 2026</span>
-                </div>
-                <div>Likely missing STRIPE_SECRET in env.</div>
-              </div>
-
-              <div class="note">
-                <div class="note-top">
-                  <strong>Admin</strong>
-                  <span class="ticket-meta">Jan 15, 2026</span>
-                </div>
-                <div>Reproduced on staging.</div>
-              </div>
-            </div>
           </div>
-          <div class="hint">JS will replace this panel when you select a ticket.</div>
         </div>
       </section>
     </main>
-     <script src="./js/index.js" type="module"></script>
+
+    <script src="./js/index.js" type="module"></script>
     <script src="./js/registerUser.js" type="module"></script>
     <script src="./js/loginUser.js" type="module"></script>
     <script src="./js/logoutUser.js" type="module"></script>
-     <script src="./js/createTicket.js" type="module"></script>
-     <script src="./js/ticket.js" type="module"></script>
+    <script src="./js/createTicket.js" type="module"></script>
+    <script src="./js/ticket&notes.js" type="module"></script>
   </body>
 </html>

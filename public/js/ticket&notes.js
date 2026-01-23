@@ -1,22 +1,42 @@
 // may be remove the DOM names that you used for only once? Organize the DOM. change the names and use El and Input for the const variable names. 
-// I added clear admin and user permissions on the lastest frontend endpoints and on :id backend endpoints. 
-// show appropriate error messages on the page. 
+// when something is being submitted, the button will be disabled.
 import { getRole } from './getRole.js';
 
-let clickedTicketId;
+// DOM (tickets)
 const ticketRenderArea = document.getElementById('ticket-render-area');
 const ticketCountArea = document.getElementById('ticket-count-area');
 const selectStatus = document.getElementById('select-status');
 const searchBar = document.getElementById('search-bar');
-const refreshBtn = document.getElementById('refersh-btn');
+const refreshBtn = document.getElementById('refresh-btn');
 const editTicketBtn = document.getElementById('edit-ticket-btn');
 const saveEditStatusEl = document.getElementById('save-edit-status');
 
+
+// DOM (Notes)
+const addNotesStatus = document.getElementById('add-note-status');
+const renderNotesArea = document.getElementById('render-notes-area');
+const adminNotesSection = document.getElementById('admin-notes-section');
+const notesHeading = document.getElementById('notes-heading');
+const noteSubmitForm = document.getElementById('note-submit-form');
+const addNoteBtn = document.getElementById('add-note-btn');
+
+
 // state
+let clickedTicketId;
+
+
+// init
 await toggleStatusRadio();
 
 
-// eventlisteners
+
+
+
+// 
+// 
+// eventlistener (editTicket)
+// 
+// 
 editTicketBtn.addEventListener('click', async()=>{
     const data = await getRole();
     const selectedRadio = document.querySelector('input[name="ticket-status"]:checked');
@@ -55,6 +75,7 @@ editTicketBtn.addEventListener('click', async()=>{
             } else if (data.role === 'admin'){
                 document.getElementById('admin-view-title').textContent = data.data.title;
                 document.getElementById('admin-view-body').textContent = data.data.body;
+
             }
             
             document.getElementById('selected-ticket-status').textContent = data.data.status;
@@ -74,10 +95,15 @@ editTicketBtn.addEventListener('click', async()=>{
 })
 
 
+
+// eventlistener (Select Ticket to edit)
 document.addEventListener('click', async(e)=>{
     if (e.target.classList.contains('select-ticket-btns')){
         try{
             clickedTicketId = e.target.dataset.ticketId;
+            if (!clickedTicketId){
+                throw new Error ('Select a valid ticket first');
+            }
             const res = await fetch(`/api/ticket/${clickedTicketId}`, {credentials: 'include'});
             const data = await res.json();
 
@@ -85,7 +111,7 @@ document.addEventListener('click', async(e)=>{
                 document.getElementById('selected-ticket-id').textContent = `Ticket #${data.data.id}`
                 document.getElementById('selected-ticket-status').textContent = data.data.status;
                 document.getElementById('selected-ticket-upadate-time').textContent = `Updated: ${data.data.updated_at}`
-
+                document.getElementById('ticket-detail-area').style.display = 'block';
                 const roleData = await getRole();
                 if (roleData.role === 'user'){
                     document.getElementById('selected-ticket-title').value = data.data.title;
@@ -94,7 +120,11 @@ document.addEventListener('click', async(e)=>{
                 } else if (roleData.role === 'admin'){
                     document.getElementById('admin-view-title').textContent = data.data.title;
                     document.getElementById('admin-view-body').textContent = data.data.body;
-
+                    adminNotesSection.style.display = 'block';
+                    // renderNotesArea.innerHTML = '';
+                    // notesHeading.textContent = '';
+                    const noteData = await getNotes();
+                    renderNotes(noteData);
                 }
             } else{
                 throw new Error(data.error || 'Fetch for getTicketById failed!');
@@ -107,6 +137,8 @@ document.addEventListener('click', async(e)=>{
     }
 })
 
+
+// Eventlistener Ticket filters
 selectStatus.addEventListener('change', eventHandler);
 
 searchBar.addEventListener('input', eventHandler);
@@ -121,7 +153,49 @@ refreshBtn.addEventListener('click', ()=>{
 
 
 
-// functions
+// Eventlisteners (NOTES)
+
+noteSubmitForm.addEventListener('submit', async(e)=>{
+    const addNoteTextarea = document.getElementById('add-note-textarea');
+    const body = addNoteTextarea.value;
+    addNoteBtn.disabled = true;
+    const ticketId = clickedTicketId;
+    e.preventDefault();
+    try{
+        const res = await fetch(`/api/notes`, {
+             method: 'POST',
+             headers: {
+            'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({ body, ticketId})
+
+        });
+
+        const data = await res.json();
+
+        if (res.ok){
+            addNotesStatus.textContent = 'New note created';
+            const noteData = await getNotes();
+            renderNotes(noteData);
+
+        } else{
+            throw new Error (data.error || 'Failed to save note');
+        }
+    } catch (error){
+        addNotesStatus.textContent = error;
+        console.error(error);
+
+    } finally{
+        addNoteBtn.disabled = false;
+        addNoteTextarea.value = '';
+    }
+})
+
+
+
+
+// Ticket functions
 
 async function eventHandler(){
     const statusValue = selectStatus.value;
@@ -217,5 +291,57 @@ async function toggleStatusRadio() {
     } else if (role === 'admin'){
         document.getElementById('edit-user-area').style.display = 'none';
     }
+}
+
+
+
+
+
+
+
+// Notes Functions
+
+async function getNotes() {
+    try{
+        const res = await fetch(`/api/notes/${clickedTicketId}`, {credentials: 'include'});
+
+        const data = await res.json();
+
+        if (res.ok){
+            return data;
+
+        } else{
+            throw new Error (data.error || 'Failed to fetch notes.')
+        }
+    }catch (error){
+        addNotesStatus.textContent = error;
+        console.error(error);
+        return [];
+    }
+    
+}
+
+
+
+function renderNotes(data){
+
+    if (data.data.length === 0){
+        addNotesStatus.textContent = 'No notes to display for this ticket';
+        return;
+    }
+
+    let finalCodeString = '';
+    data.data.forEach((note)=>{
+        finalCodeString += `
+            <div class="note">
+                <div class="note-top">
+                  <strong>${note.name}</strong>
+                  <span class="ticket-meta">${note.created_at}</span>
+                </div>
+                <div>${note.body}</div>
+            </div>`
+    });
+    renderNotesArea.innerHTML = finalCodeString;
+    notesHeading.textContent = 'Notes';
 }
 

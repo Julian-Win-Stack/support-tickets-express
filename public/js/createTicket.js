@@ -1,3 +1,5 @@
+import { getTickets, renderTickets } from './ticket&notes.js';
+
 const createTicketForm = document.getElementById('create-ticket-form');
 const titleArea = document.getElementById('create-ticket-title-area');
 const createTicketBtn = document.getElementById('create-ticket-btn');
@@ -22,7 +24,10 @@ createTicketForm.addEventListener('submit',async(e)=>{
         const data = await res.json();
 
         if (res.ok){
-            ticketStatusArea.textContent = 'Ticket created';
+            const data = await getTickets();
+            renderTickets(data);
+            ticketStatusArea.textContent = 'Ticket created'
+            
         } else{
             throw new Error (data.error || 'Action failed. Please try again');
         }
