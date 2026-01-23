@@ -11,3 +11,7 @@ yarn-error.log*
 
 # OS junk
 .DS_Store
+
+# Database
+app.db
+*.db
