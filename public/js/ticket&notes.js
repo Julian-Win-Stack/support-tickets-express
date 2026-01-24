@@ -1,4 +1,3 @@
-// may be remove the DOM names that you used for only once? Organize the DOM. change the names and use El and Input for the const variable names. 
 // when something is being submitted, the button will be disabled.
 import { getRole } from './getRole.js';
 
@@ -10,7 +9,6 @@ const searchBar = document.getElementById('search-bar');
 const refreshBtn = document.getElementById('refresh-btn');
 const editTicketBtn = document.getElementById('edit-ticket-btn');
 const saveEditStatusEl = document.getElementById('save-edit-status');
-
 
 // DOM (Notes)
 const addNotesStatus = document.getElementById('add-note-status');
@@ -38,7 +36,8 @@ await toggleStatusRadio();
 // 
 // 
 editTicketBtn.addEventListener('click', async()=>{
-    const data = await getRole();
+    editTicketBtn.disabled = true;
+    const data = await getRole(); 
     const selectedRadio = document.querySelector('input[name="ticket-status"]:checked');
     const titleInput = document.getElementById('selected-ticket-title');
     const bodyInput = document.getElementById('selected-ticket-body');
@@ -90,6 +89,8 @@ editTicketBtn.addEventListener('click', async()=>{
     }catch (error){
         saveEditStatusEl.textContent = error;
         console.error(error);
+    } finally{
+        editTicketBtn.disabled = false;
     }
 
 })
@@ -99,8 +100,16 @@ editTicketBtn.addEventListener('click', async()=>{
 // eventlistener (Select Ticket to edit)
 document.addEventListener('click', async(e)=>{
     if (e.target.classList.contains('select-ticket-btns')){
+        const clickedBtn = e.target;
+        clickedBtn.disabled = true;
+
+        
         try{
             clickedTicketId = e.target.dataset.ticketId;
+            if (!Number.isInteger(Number(e.target.dataset.ticketId)) || Number(e.target.dataset.ticketId) <= 0){
+                throw new Error ('Invalid ticket id');
+            }
+    
             if (!clickedTicketId){
                 throw new Error ('Select a valid ticket first');
             }
@@ -133,6 +142,8 @@ document.addEventListener('click', async(e)=>{
         }catch (error){
             document.getElementById('select-ticket-err-msg').textContent = error;
             console.error(error);
+        }finally{
+            clickedBtn.disabled = false;
         }
     }
 })
@@ -316,7 +327,7 @@ async function getNotes() {
     }catch (error){
         addNotesStatus.textContent = error;
         console.error(error);
-        return [];
+        return {data: []};
     }
     
 }

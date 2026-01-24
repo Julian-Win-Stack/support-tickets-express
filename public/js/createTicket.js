@@ -7,8 +7,8 @@ const bodyArea = document.getElementById('create-ticket-body-area');
 const ticketStatusArea = document.getElementById('create-ticket-status-area');
 
 createTicketForm.addEventListener('submit',async(e)=>{
-    createTicketBtn.disabled = true;
     e.preventDefault();
+    createTicketBtn.disabled = true;
     const title = (titleArea.value).trim();
     const body = (bodyArea.value).trim();
     try{
