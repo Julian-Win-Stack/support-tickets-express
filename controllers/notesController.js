@@ -61,6 +61,12 @@ export async function createNotes(req,res) {
 export async function getNotes(req,res) {
     const db = await getDBConnection();
 
+    const numberedId = Number(req.params.id);
+
+    if (!Number.isInteger(numberedId) || numberedId < 1){
+        return res.status(400).json({error: 'Invalid TicketId!'});
+    }   
+
     const userId = req.session.userId;
     const isAdminRow = await db.get(`SELECT role FROM users WHERE id = ?`, [userId]);
 
@@ -71,12 +77,6 @@ export async function getNotes(req,res) {
     if (isAdminRow.role !== 'admin'){
         return res.status(403).json({error: 'Forbidden! Only admins are allowed to notes.'});
     }
-
-    const numberedId = Number(req.params.id);
-
-    if (!Number.isInteger(numberedId) || numberedId < 1){
-        return res.status(400).json({error: 'Invalid TicketId!'});
-    }   
 
     const notesArray = await db.all(
         `SELECT N.created_at, N.body, U.name 

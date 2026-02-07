@@ -1,5 +1,6 @@
 import { getDBConnection } from '../db/db.js';
 import { getWordCount } from '../BackendHelper/getWordCount.js';
+import { buildTicketConstraints } from '../BackendHelper/buildTicketConstraints.js';
 
 export async function createTickets(req,res) {
     try{
@@ -44,12 +45,68 @@ export async function createTickets(req,res) {
 
 export async function getTickets(req,res) {
     try{
+        const db = await getDBConnection();
+        const userId = req.session.userId;
+
+        const { status = '', search = ''} = req.query;
+        const cleanStatus = (status.trim()).toLowerCase();
+        const cleanSearch = search.trim();
+
+        const roleRow = await db.get(
+            `SELECT role 
+            FROM users 
+            WHERE id = ?`,
+            [userId]
+        );
+
+        if (!roleRow){
+            return res.status(401).json({error: 'Invalid user'});
+        }
+
+        const baseSqliteCode = 
+                [`SELECT T.*, U.email, U.name
+                FROM tickets T
+                JOIN users U ON T.user_id = U.id`];
+
+        const { whereParts:plainWhereParts, userInput:plainUserInput } = buildTicketConstraints(roleRow.role, userId, '', '');
+
+        const countTicketSqliteCode = 'SELECT COUNT(*) AS total_tickets FROM tickets T';
+
+        const totalTicketSqliteCode = plainWhereParts.length > 0 ? countTicketSqliteCode + ' WHERE ' + plainWhereParts.join(' AND ') : countTicketSqliteCode;
+
+        const totalTicketRow = await db.get(totalTicketSqliteCode, plainUserInput);
+        const numberOfTotalTicket = totalTicketRow.total_tickets;
+
+        const { whereParts, userInput } = buildTicketConstraints(roleRow.role, userId, cleanStatus, cleanSearch);
+
+        if (whereParts.length > 0){
+            baseSqliteCode.push('WHERE');
+            baseSqliteCode.push(whereParts.join(' AND '));
+        }
+
+        const finalSqliteCode = baseSqliteCode.join(' ');
+        const ticketArray = await db.all(finalSqliteCode, userInput);
+        return res.json({data: ticketArray, ticketsShown: ticketArray.length, totalTicket: numberOfTotalTicket});
+
+
+    }catch(error){
+        console.error(error);
+        return res.status(500).json({error: 'Server failed. Please try again.'});
+    }
+}
+
+
+
+
+
+export async function getTickets2(req,res) {
+    try{
 
         const db = await getDBConnection();
         const userId = req.session.userId;
 
         const { status = '', search = ''} = req.query;
-        const cleanStatus = status.trim();
+        const cleanStatus = (status.trim()).toLowerCase();
         const cleanSearch = search.trim();
 
         const roleRow = await db.get(
@@ -168,6 +225,12 @@ export async function getTickets(req,res) {
 export async function getTicketsById(req,res) {
     try{
         const db = await getDBConnection();
+
+        const ticketId = Number(req.params.id);
+
+        if (!Number.isInteger(ticketId) || ticketId < 1){
+            return res.status(400).json({error: 'Invalid ticket id'});
+        }
         const userId = req.session.userId;
     
         const checkAdminRow = await db.get(`SELECT role FROM users WHERE id = ?`, [userId]);
@@ -176,12 +239,6 @@ export async function getTicketsById(req,res) {
             return res.status(401).json({error: 'User not logged in. Please login again. '});
         }
        
-        const ticketId = Number(req.params.id);
-
-        if (!Number.isInteger(ticketId) || ticketId < 1){
-            return res.status(400).json({error: 'Invalid ticket id'});
-        }
-
         if (checkAdminRow.role === 'admin'){
 
             const ticketRow = await db.get(
@@ -217,15 +274,19 @@ export async function getTicketsById(req,res) {
 }
 
 
-
 export async function updateTicketsTitle_Body_Status(req,res) {
     try{
 
         const db = await getDBConnection();
-        const userId = req.session.userId;
 
+        const ticketId = Number(req.params.id);
+        if (!Number.isInteger(ticketId) || ticketId <= 0){
+            return res.status(400).json({error: 'Invalid ticket id'});
+        }
+
+        const userId = req.session.userId;
         const checkRole = await db.get(`SELECT role FROM users WHERE id = ?`, [userId]);
-        
+
         if (!checkRole){
             return res.status(401).json({error: 'Invalid user!'});
         }
@@ -234,7 +295,7 @@ export async function updateTicketsTitle_Body_Status(req,res) {
 
         const cleanTitle = title.trim();
         const cleanBody = body.trim();
-        const cleanStatus = status.trim();
+        const cleanStatus = (status.trim()).toLowerCase();
 
         if (checkRole.role === 'user' && cleanStatus ){
             return res.status(403).json({error: 'Forbidden. User trying to update status.'});
@@ -248,14 +309,11 @@ export async function updateTicketsTitle_Body_Status(req,res) {
             return res.status(400).json({error: 'No changes made'});
         }
 
-        const ticketId = Number(req.params.id);
-        
-        if (!Number.isInteger(ticketId) || ticketId <= 0){
-            return res.status(400).json({error: 'Invalid ticket id'});
-        }
-
-
         if (checkRole.role === 'admin'){
+
+            if (cleanStatus !== 'open' && cleanStatus !== 'in_progress' && cleanStatus !== 'resolved'){
+                return res.status(400).json({error: 'Invalid status'});
+            }
 
             const isTicketExists = await db.get(
                 `SELECT title 
