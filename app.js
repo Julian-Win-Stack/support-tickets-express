@@ -7,13 +7,16 @@ import { initDB } from './db/initDB.js';
 import { authRouter } from './routes/authRouter.js';
 import { ticketRouter } from './routes/ticketRouter.js';
 import { notesRouter } from './routes/notesRouter.js';
+import { initDBConnection } from './db/db.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // #region agent log
+
 fetch('http://127.0.0.1:7242/ingest/27fe6fd2-65e8-45af-943a-8f4a6a7bfe17',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:beforeInitDB',message:'app.js loading, about to initDB',data:{NODE_ENV:process.env.NODE_ENV},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H1'})}).catch(()=>{});
 // #endregion
+await initDBConnection();
 await initDB();
 
 const app = express();

@@ -1,9 +1,9 @@
-import { getDBConnection } from '../db/db.js';
+import { getDB } from '../db/db.js';
 import { getWordCount } from '../BackendHelper/getWordCount.js';
 
 export async function createNotes(req,res) {
     try{
-        const db = await getDBConnection();
+        const db = getDB();
         const userId = req.session.userId;
 
         const isAdminRow = await db.get(`SELECT role FROM users WHERE id = ?`, [userId]);
@@ -59,7 +59,7 @@ export async function createNotes(req,res) {
 }
 
 export async function getNotes(req,res) {
-    const db = await getDBConnection();
+    const db = getDB();
 
     const numberedId = Number(req.params.id);
 

@@ -1,10 +1,10 @@
-import { getDBConnection } from '../db/db.js';
+import { getDB } from '../db/db.js';
 import { getWordCount } from '../BackendHelper/getWordCount.js';
 import { buildTicketConstraints } from '../BackendHelper/buildTicketConstraints.js';
 
 export async function createTickets(req,res) {
     try{
-        const db = await getDBConnection();
+        const db = getDB();
         const userId = req.session.userId;
 
         const { title = '', body = ''} = req.body;
@@ -45,7 +45,7 @@ export async function createTickets(req,res) {
 
 export async function getTickets(req,res) {
     try{
-        const db = await getDBConnection();
+        const db = getDB();
         const userId = req.session.userId;
 
         const { status = '', search = ''} = req.query;
@@ -97,134 +97,9 @@ export async function getTickets(req,res) {
 
 
 
-
-
-export async function getTickets2(req,res) {
-    try{
-
-        const db = await getDBConnection();
-        const userId = req.session.userId;
-
-        const { status = '', search = ''} = req.query;
-        const cleanStatus = (status.trim()).toLowerCase();
-        const cleanSearch = search.trim();
-
-        const roleRow = await db.get(
-            `SELECT role 
-            FROM users 
-            WHERE id = ?`,
-            [userId]
-        );
-
-        if (!roleRow){
-            return res.status(401).json({error: 'Invalid user'});
-        }
-
-        const mainSqliteCode = 
-                [`SELECT T.*, U.email, U.name
-                FROM tickets T
-                JOIN users U ON T.user_id = U.id`];
-        
-        const joinSqliteCode = [];
-
-        const userInput = [];
-
-        if (roleRow.role === 'admin'){
-            const totalTicketArray = await db.all(mainSqliteCode[0]);
-            const numberOfTotalTicket = totalTicketArray.length;
-            
-            if ( cleanStatus || cleanSearch ){
-                mainSqliteCode.push('WHERE');
-            }
-
-            if (cleanStatus){
-                joinSqliteCode.push(`T.status = ?`);
-                userInput.push(cleanStatus);
-            }
-
-            if (cleanSearch){
-                const dbSearchInput = `%${cleanSearch}%`;
-                joinSqliteCode.push(`(T.title LIKE ? OR T.body LIKE ?)`);
-                userInput.push(dbSearchInput);
-                userInput.push(dbSearchInput);
-            }
-
-            if (joinSqliteCode.length === 1){
-                
-                mainSqliteCode.push(joinSqliteCode[0]);
-                const finalMainSqliteCode = mainSqliteCode.join(' ');
-                const ticketArray = await db.all(finalMainSqliteCode, userInput);
-                return res.json({data: ticketArray, totalTicket: numberOfTotalTicket, ticketsShown: ticketArray.length});
-            }
-
-            if (joinSqliteCode.length > 1 && userInput.length > 1){
-
-                const finalJoinSqliteCode = joinSqliteCode.join(' AND ');
-                mainSqliteCode.push(finalJoinSqliteCode);
-                const finalMainSqliteCode = mainSqliteCode.join(' ');
-                const ticketArray = await db.all(finalMainSqliteCode, userInput);
-                return res.json({data: ticketArray, totalTicket: numberOfTotalTicket, ticketsShown: ticketArray.length});
-            }
-
-        return res.json({data: totalTicketArray, totalTicket: numberOfTotalTicket, ticketsShown: numberOfTotalTicket});
-
-
-        } else if (roleRow.role === 'user'){
-
-             mainSqliteCode.push('WHERE T.user_id = ?');
-             userInput.push(userId);
-
-            const totalUserTicketArray = await db.all(mainSqliteCode.join(' '), userInput);
-            const numberOfTotalTicket = totalUserTicketArray.length;
-
-            if (cleanStatus || cleanSearch){
-                mainSqliteCode.push('AND');
-            }
-
-            if (cleanStatus){
-                joinSqliteCode.push(`T.status = ?`);
-                userInput.push(cleanStatus);
-            }
-
-            if (cleanSearch){
-                const dbSearchInput = `%${cleanSearch}%`;
-                joinSqliteCode.push(`(T.title LIKE ? OR T.body LIKE ?)`);
-                userInput.push(dbSearchInput);
-                userInput.push(dbSearchInput);
-            }
-
-            if (joinSqliteCode.length === 1){
-
-                mainSqliteCode.push(joinSqliteCode[0]);
-                const finalMainSqliteCode = mainSqliteCode.join(' ');
-                const ticketArray = await db.all(finalMainSqliteCode, userInput);
-                return res.json({data: ticketArray, totalTicket: numberOfTotalTicket, ticketsShown: ticketArray.length});
-            }
-
-            if (joinSqliteCode.length > 1 && userInput.length > 1){
-
-                const finalJoinSqliteCode = joinSqliteCode.join(' AND ');
-                mainSqliteCode.push(finalJoinSqliteCode);
-                const finalMainSqliteCode = mainSqliteCode.join(' ');
-                const ticketArray = await db.all(finalMainSqliteCode, userInput);
-                return res.json({data: ticketArray, totalTicket: numberOfTotalTicket, ticketsShown: ticketArray.length});
-            }
-
-        const finalMainSqliteCode = mainSqliteCode.join(' ');
-        const ticketArray = await db.all(finalMainSqliteCode, userInput);
-        return res.json({data: ticketArray, totalTicket: numberOfTotalTicket, ticketsShown: ticketArray.length});
-
-        }
-    }catch(error){
-        console.error(error);
-        return res.status(500).json({error: 'Server failed. Please try again.'});
-    }
-    
-}
-
 export async function getTicketsById(req,res) {
     try{
-        const db = await getDBConnection();
+        const db = getDB();
 
         const ticketId = Number(req.params.id);
 
@@ -277,7 +152,7 @@ export async function getTicketsById(req,res) {
 export async function updateTicketsTitle_Body_Status(req,res) {
     try{
 
-        const db = await getDBConnection();
+        const db = getDB();
 
         const ticketId = Number(req.params.id);
         if (!Number.isInteger(ticketId) || ticketId <= 0){

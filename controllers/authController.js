@@ -1,9 +1,9 @@
 import bcrypt from 'bcrypt';
-import { getDBConnection } from '../db/db.js';
+import { getDB } from '../db/db.js';
 
 export async function registerUser(req,res) {
     try{
-        const db = await getDBConnection();
+        const db = getDB();
         const { registerName = '', registerEmail = '', registerPassword = '' } = req.body;
     
         const cleanName = registerName.trim();
@@ -41,7 +41,7 @@ export async function registerUser(req,res) {
 
 export async function loginUser(req,res) {
     try{
-        const db = await getDBConnection();
+        const db = getDB();
         const { loginEmail = '', loginPassword = '' } = req.body;
     
         const cleanEmail = loginEmail.trim();
@@ -101,7 +101,7 @@ export async function checkMe(req,res) {
     const userId = req.session.userId;
 
     if (userId){
-        const db = await getDBConnection();
+        const db = getDB();
 
         const dbRow = await db.get(`
             SELECT name, role FROM users

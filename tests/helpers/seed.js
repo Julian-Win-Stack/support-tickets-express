@@ -1,10 +1,10 @@
 import bcrypt from 'bcrypt';
-import { getDBConnection } from '../../db/db.js';
+import { getDB } from '../../db/db.js';
 import { SEED_PASSWORD, USERA_EMAIL, USERB_EMAIL, ADMIN_EMAIL } from './constants.js';
 
 
 export async function seed() {
-    const db = await getDBConnection();
+    const db = getDB();
     const hashedPassword = await bcrypt.hash(SEED_PASSWORD, 10);
 
     await db.run(`
@@ -37,7 +37,6 @@ export async function seed() {
         [ticketId.id, adminId.id, 'Note 1'],
     );
 
-    await db.close();
     return { ticketId: ticketId.id};
 }
 
