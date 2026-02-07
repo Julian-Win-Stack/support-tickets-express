@@ -236,7 +236,7 @@ export async function updateTicketsTitle_Body_Status(req,res) {
         const cleanBody = body.trim();
         const cleanStatus = status.trim();
 
-        if (checkRole.role === 'user' && cleanStatus){
+        if (checkRole.role === 'user' && cleanStatus ){
             return res.status(403).json({error: 'Forbidden. User trying to update status.'});
         }
 

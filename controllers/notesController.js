@@ -53,7 +53,8 @@ export async function createNotes(req,res) {
 
     }catch (error){
         console.error(error);
-        return res.status(500).json({error: 'Server failed. Please try again.'});
+        // return res.status(500).json({error: 'Server failed. Please try again.'});
+        return res.status(500).json({error: error.message});
     }
 }
 
