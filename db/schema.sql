@@ -28,6 +28,17 @@ CREATE TABLE IF NOT EXISTS notes (
     FOREIGN KEY (admin_id) REFERENCES users(id) ON DELETE CASCADE               
 );
 
+CREATE TABLE IF NOT EXISTS audit_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    actor_user_id INTEGER NOT NULL,
+    action TEXT NOT NULL,
+    entity_type TEXT NOT NULL,
+    entity_id INTEGER NOT NULL,
+    before TEXT,
+    after TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
 
 
 

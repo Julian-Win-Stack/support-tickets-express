@@ -48,6 +48,11 @@ export async function createNotes(req,res) {
             VALUES (? , ?, ?)
             `, [numberedTicketId, userId, cleanBody]
         );
+        await db.run(
+            `INSERT INTO audit_events (actor_user_id, action, entity_type, entity_id, after)
+            VALUES (?, ?, ?, ?, ?)
+            `, [userId, 'note_created', 'notes', numberedTicketId, cleanBody]
+        );
 
         return res.status(201).json({ok: true});
 

@@ -26,10 +26,18 @@ export async function registerUser(req,res) {
     
         const passwordHash = await bcrypt.hash(registerPassword, saltRounds);
     
-        await db.run(`
+        const result = await db.run(`
             INSERT INTO users (name, email, password_hash)
             VALUES (?, ?, ?)
             `, [cleanName, cleanEmail, passwordHash]);
+        
+        const userId = result.lastID;
+
+        await db.run(
+            `INSERT INTO audit_events (actor_user_id, action, entity_type, entity_id, after)
+            VALUES (?, ?, ?, ?, ?)
+            `, [userId, 'user_registered', 'user', userId, JSON.stringify({ authenticated: true })]
+        );
 
         return res.status(201).json({ok: true})
 
@@ -69,6 +77,12 @@ export async function loginUser(req,res) {
 
         req.session.userId = dbRow.id;
 
+        await db.run(
+            `INSERT INTO audit_events (actor_user_id, action, entity_type, entity_id, after)
+            VALUES (?, ?, ?, ?, ?)
+            `, [dbRow.id, 'user_logged_in', 'user', dbRow.id, JSON.stringify({ authenticated: true })]
+        );
+
         return res.json({ok: true, name: dbRow.name, role: dbRow.role});
 
     }catch (error){
@@ -83,18 +97,22 @@ export async function logoutUser(req,res) {
     if (!req.session){
         return res.json({ok: true});
     }
+    const userId = req.session.userId;
 
     req.session.destroy( (error)=>{
         if (error){
             console.error(error);
             return res.status(500).json({error: 'User failed to logout. Please try again.'});
         }
-
     res.clearCookie('sid');
+    });
+    const db = getDB();
+    await db.run(
+        `INSERT INTO audit_events (actor_user_id, action, entity_type, entity_id, after)
+        VALUES (?, ?, ?, ?, ?)
+        `, [userId, 'user_logged_out', 'user', userId, JSON.stringify({ authenticated: false })]
+    );
     return res.json({ok: true});
-    })
-    
-
 }
 
 export async function checkMe(req,res) {

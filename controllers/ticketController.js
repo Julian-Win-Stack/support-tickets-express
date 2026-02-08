@@ -29,11 +29,17 @@ export async function createTickets(req,res) {
             return res.status(400).json({error: 'Word count for the body should be no more than 300 words'});
         }
 
-        await db.run(`
+        const result = await db.run(`
             INSERT INTO tickets (user_id, title, body, status)
             VALUES (?, ?, ?, ?)
             `, [userId, cleanTitle, cleanBody, 'open']);
 
+        const ticketId = result.lastID;
+
+        await db.run(`
+            INSERT INTO audit_events (actor_user_id, action, entity_type, entity_id, after)
+            VALUES (?, ?, ?, ?, ?)
+            `, [userId, 'ticket_created', 'ticket', ticketId, JSON.stringify({title: cleanTitle, body: cleanBody, status: 'open'})]);
 
         return res.status(201).json({ok: true});
 
@@ -190,16 +196,18 @@ export async function updateTicketsTitle_Body_Status(req,res) {
                 return res.status(400).json({error: 'Invalid status'});
             }
 
-            const isTicketExists = await db.get(
-                `SELECT title 
+            const existingTicket = await db.get(
+                `SELECT status 
                 FROM tickets 
                 WHERE id = ? 
                 `, [ticketId]
             );
 
-            if (!isTicketExists){
+            if (!existingTicket){
                 return res.status(404).json({error: 'Ticket not found'});
             }
+
+            const oldStatus = existingTicket.status;
 
             await db.run(
                 `UPDATE tickets
@@ -216,21 +224,30 @@ export async function updateTicketsTitle_Body_Status(req,res) {
                 `, [ticketId]
             );
 
+            await db.run(
+                `INSERT INTO audit_events (actor_user_id, action, entity_type, entity_id, before, after)
+                VALUES (?, ?, ?, ?, ?, ?)
+                `, [userId, 'ticket_status_updated', 'ticket', ticketId, oldStatus, cleanStatus]
+            );
+
             return res.json({ok: true, data:updatedValue});
 
         } else if (checkRole.role === 'user'){
 
-            const isTicketExists = await db.get(
-                `SELECT title 
+            const existingTicket = await db.get(
+                `SELECT title, body
                 FROM tickets 
                 WHERE id = ? 
                 AND user_id = ?
                 `, [ticketId, userId]
             );
 
-            if (!isTicketExists){
+            if (!existingTicket){
                 return res.status(404).json({error: 'Ticket not found'});
             }
+
+            const oldTitle = existingTicket.title;
+            const oldBody = existingTicket.body;
 
             await db.run(
                 `UPDATE tickets 
@@ -249,6 +266,12 @@ export async function updateTicketsTitle_Body_Status(req,res) {
                 `, [ticketId, userId]
             );
             
+            await db.run(
+                `INSERT INTO audit_events (actor_user_id, action, entity_type, entity_id, before, after)
+                VALUES (?, ?, ?, ?, ?, ?)
+                `, [userId, 'ticket_title_body_updated', 'ticket', ticketId, JSON.stringify({title: oldTitle, body: oldBody}), JSON.stringify({title: cleanTitle, body: cleanBody})]
+            );
+
             return res.json({ok: true, data: updatedValue});
         }
 
