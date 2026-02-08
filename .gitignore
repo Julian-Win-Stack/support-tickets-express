@@ -15,3 +15,6 @@ yarn-error.log*
 # Database
 app.db
 *.db
+
+# Cursor plans (local only)
+.cursor/plans/
