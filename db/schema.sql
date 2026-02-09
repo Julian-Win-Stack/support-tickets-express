@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS jobs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     type TEXT NOT NULL,
     payload_json TEXT NOT NULL,
-    status TEXT NOT NULL CHECK (status IN ('queued', 'processing', 'succeeded', 'failed', 'dead')),
+    status TEXT NOT NULL CHECK (status IN ('queued', 'processing', 'succeeded', 'dead')),
     attempts INTEGER NOT NULL DEFAULT 0,
     max_attempts INTEGER NOT NULL DEFAULT 3,
     run_at DATETIME NOT NULL,
