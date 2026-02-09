@@ -198,10 +198,8 @@ export async function updateTicketsTitle_Body_Status(req,res) {
             }
 
             const existingTicket = await db.get(
-                `SELECT status 
-                FROM tickets 
-                WHERE id = ? 
-                `, [ticketId]
+                `SELECT status, user_id FROM tickets WHERE id = ?`,
+                [ticketId]
             );
 
             if (!existingTicket){
@@ -209,6 +207,7 @@ export async function updateTicketsTitle_Body_Status(req,res) {
             }
 
             const oldStatus = existingTicket.status;
+            const ticketOwnerId = existingTicket.user_id;
 
             await db.run(
                 `UPDATE tickets
@@ -226,12 +225,13 @@ export async function updateTicketsTitle_Body_Status(req,res) {
             );
 
             await db.run(
-                `INSERT INTO audit_events (actor_user_id, action, entity_type, entity_id, before, after)
+                `INSERT INTO audit_events 
+                (actor_user_id, action, entity_type, entity_id, before, after)
                 VALUES (?, ?, ?, ?, ?, ?)
                 `, [userId, 'ticket_status_updated', 'ticket', ticketId, oldStatus, cleanStatus]
             ); 
 
-            await enqueueJob('ticket_status_changed', { userId: userId, ticketId: ticketId, oldStatus: oldStatus, newStatus: cleanStatus } );
+            await enqueueJob('ticket_status_changed', { userId: ticketOwnerId, ticketId, oldStatus, newStatus: cleanStatus } );
 
             return res.json({ok: true, data:updatedValue});
 
