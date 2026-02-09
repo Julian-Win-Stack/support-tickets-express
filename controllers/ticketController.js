@@ -1,6 +1,7 @@
 import { getDB } from '../db/db.js';
 import { getWordCount } from '../BackendHelper/getWordCount.js';
 import { buildTicketConstraints } from '../BackendHelper/buildTicketConstraints.js';
+import { enqueueJob } from '../lib/jobsDb.js';
 
 export async function createTickets(req,res) {
     try{
@@ -228,7 +229,9 @@ export async function updateTicketsTitle_Body_Status(req,res) {
                 `INSERT INTO audit_events (actor_user_id, action, entity_type, entity_id, before, after)
                 VALUES (?, ?, ?, ?, ?, ?)
                 `, [userId, 'ticket_status_updated', 'ticket', ticketId, oldStatus, cleanStatus]
-            );
+            ); 
+
+            await enqueueJob('ticket_status_changed', { userId: userId, ticketId: ticketId, oldStatus: oldStatus, newStatus: cleanStatus } );
 
             return res.json({ok: true, data:updatedValue});
 
