@@ -137,11 +137,11 @@ describe('permissions', () => {
             await loginAsAdmin(agent);
             const res = await agent.post('/api/notes').send({
                 body: 'Note 2',
-                ticketId: String(ticketId),
+                cleanTicketId: Number(ticketId),
             });
             expect(res.status).toBe(201);
             expect(res.body.ok).toBe(true);
-
+ 
             const db = getDB();
             const auditRow = await db.get(
                 `SELECT * FROM audit_events

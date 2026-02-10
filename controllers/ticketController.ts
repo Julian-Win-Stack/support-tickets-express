@@ -2,18 +2,24 @@ import { getDB } from '../db/db.js';
 import { getWordCount } from '../BackendHelper/getWordCount.js';
 import { buildTicketConstraints } from '../BackendHelper/buildTicketConstraints.js';
 import { enqueueJob } from '../lib/jobsDb.js';
+import type { Request, Response } from 'express';
 
-export async function createTickets(req,res) {
+type CreateTicketsBody = {
+    title?: string;
+    body?: string;
+}
+export async function createTickets(req: Request, res: Response): Promise<void> {
     try{
         const db = getDB();
         const userId = req.session.userId;
 
-        const { title = '', body = ''} = req.body;
+        const { title = '', body = ''} = req.body as CreateTicketsBody;
         const cleanTitle = title.trim();
         const cleanBody = body.trim();
 
         if (!cleanTitle || !cleanBody){
-            return res.status(400).json({error: 'Missing inputs'});
+            res.status(400).json({error: 'Missing inputs'});
+            return;
         }
 
         const titleWordCountLimit = 15;
@@ -23,11 +29,13 @@ export async function createTickets(req,res) {
         const bodyWordCount = getWordCount(cleanBody);
 
         if (titleWordCount > titleWordCountLimit){
-            return res.status(400).json({error: 'Word count for the title should be no more than 15 words'});
+            res.status(400).json({error: 'Word count for the title should be no more than 15 words'});
+            return;
         }
 
         if (bodyWordCount > bodyWordCountLimit){
-            return res.status(400).json({error: 'Word count for the body should be no more than 300 words'});
+            res.status(400).json({error: 'Word count for the body should be no more than 300 words'});
+            return;
         }
 
         const result = await db.run(`
@@ -42,20 +50,26 @@ export async function createTickets(req,res) {
             VALUES (?, ?, ?, ?, ?)
             `, [userId, 'ticket_created', 'ticket', ticketId, JSON.stringify({title: cleanTitle, body: cleanBody, status: 'open'})]);
 
-        return res.status(201).json({ok: true});
+        res.status(201).json({ok: true});
+        return;
 
     }catch(error){
         console.error(error);
-        return res.status(500).json({error: 'Server failed. Please try again.'});
+        res.status(500).json({error: 'Server failed. Please try again.'});
+        return;
     }
 }
 
-export async function getTickets(req,res) {
+type GetTicketsQuery = {
+    status?: string;
+    search?: string;
+}
+export async function getTickets(req: Request, res: Response): Promise<void> {
     try{
         const db = getDB();
-        const userId = req.session.userId;
+        const userId = req.session.userId as number;
 
-        const { status = '', search = ''} = req.query;
+        const { status = '', search = ''} = req.query as GetTicketsQuery;
         const cleanStatus = (status.trim()).toLowerCase();
         const cleanSearch = search.trim();
 
@@ -67,7 +81,8 @@ export async function getTickets(req,res) {
         );
 
         if (!roleRow){
-            return res.status(401).json({error: 'Invalid user'});
+            res.status(401).json({error: 'Invalid user'});
+            return;
         }
 
         const baseSqliteCode = 
@@ -93,32 +108,36 @@ export async function getTickets(req,res) {
 
         const finalSqliteCode = baseSqliteCode.join(' ');
         const ticketArray = await db.all(finalSqliteCode, userInput);
-        return res.json({data: ticketArray, ticketsShown: ticketArray.length, totalTicket: numberOfTotalTicket});
+        res.json({data: ticketArray, ticketsShown: ticketArray.length, totalTicket: numberOfTotalTicket});
+        return;
 
 
     }catch(error){
         console.error(error);
-        return res.status(500).json({error: 'Server failed. Please try again.'});
+        res.status(500).json({error: 'Server failed. Please try again.'});
+        return;
     }
 }
 
 
 
-export async function getTicketsById(req,res) {
+export async function getTicketsById(req: Request, res: Response): Promise<void> {
     try{
         const db = getDB();
 
-        const ticketId = Number(req.params.id);
+        const ticketId = Number(req.params.id as string);
 
         if (!Number.isInteger(ticketId) || ticketId < 1){
-            return res.status(400).json({error: 'Invalid ticket id'});
+            res.status(400).json({error: 'Invalid ticket id'});
+            return;
         }
         const userId = req.session.userId;
     
         const checkAdminRow = await db.get(`SELECT role FROM users WHERE id = ?`, [userId]);
     
         if (!checkAdminRow){
-            return res.status(401).json({error: 'User not logged in. Please login again. '});
+            res.status(401).json({error: 'User not logged in. Please login again. '});
+            return;
         }
        
         if (checkAdminRow.role === 'admin'){
@@ -130,10 +149,12 @@ export async function getTicketsById(req,res) {
             );
         
             if (!ticketRow){
-                return res.status(404).json({error: 'Ticket not found'});
+                res.status(404).json({error: 'Ticket not found'});
+                return;
             }
         
-            return res.json({data: ticketRow});
+            res.json({data: ticketRow});
+            return;
 
         } else if (checkAdminRow.role === 'user'){
             const ticketRow = await db.get(
@@ -143,58 +164,71 @@ export async function getTicketsById(req,res) {
             );
         
             if (!ticketRow){
-                return res.status(404).json({error: 'Ticket not found'});
+                res.status(404).json({error: 'Ticket not found'});
+                return;
             }
         
-            return res.json({data: ticketRow});
+            res.json({data: ticketRow});
+            return;
         }
 
     } catch(error){
         console.error(error);
-        return res.status(500).json({error: 'Server failed. Please try again.'});
+        res.status(500).json({error: 'Server failed. Please try again.'});
+        return;
     }
 }
 
+type UpdateTicketsTitle_Body_StatusBody = {
+    title?: string;
+    body?: string;
+    status?: string;
+}
 
-export async function updateTicketsTitle_Body_Status(req,res) {
+export async function updateTicketsTitle_Body_Status(req: Request, res: Response): Promise<void> {
     try{
-
         const db = getDB();
 
-        const ticketId = Number(req.params.id);
+        const ticketId = Number(req.params.id as string);
         if (!Number.isInteger(ticketId) || ticketId <= 0){
-            return res.status(400).json({error: 'Invalid ticket id'});
+            res.status(400).json({error: 'Invalid ticket id'});
+            return;
         }
 
         const userId = req.session.userId;
         const checkRole = await db.get(`SELECT role FROM users WHERE id = ?`, [userId]);
 
         if (!checkRole){
-            return res.status(401).json({error: 'Invalid user!'});
+            res.status(401).json({error: 'Invalid user!'});
+            return;
         }
 
-        const { title = '', body = '', status = '' } = req.body;
+        const { title = '', body = '', status = '' } = req.body as UpdateTicketsTitle_Body_StatusBody;
 
         const cleanTitle = title.trim();
         const cleanBody = body.trim();
         const cleanStatus = (status.trim()).toLowerCase();
 
         if (checkRole.role === 'user' && cleanStatus ){
-            return res.status(403).json({error: 'Forbidden. User trying to update status.'});
+            res.status(403).json({error: 'Forbidden. User trying to update status.'});
+            return;
         }
 
         if (checkRole.role === 'admin' && (cleanTitle || cleanBody)){
-            return res.status(403).json({error: 'Forbidden. Admin trying to change title and body.'});
+            res.status(403).json({error: 'Forbidden. Admin trying to change title and body.'});
+            return;
         }
 
         if (checkRole.role === 'admin' && !cleanStatus){
-            return res.status(400).json({error: 'No changes made'});
+            res.status(400).json({error: 'No changes made'});
+            return;
         }
 
         if (checkRole.role === 'admin'){
 
             if (cleanStatus !== 'open' && cleanStatus !== 'in_progress' && cleanStatus !== 'resolved'){
-                return res.status(400).json({error: 'Invalid status'});
+                res.status(400).json({error: 'Invalid status'});
+                return;
             }
 
             const existingTicket = await db.get(
@@ -203,7 +237,8 @@ export async function updateTicketsTitle_Body_Status(req,res) {
             );
 
             if (!existingTicket){
-                return res.status(404).json({error: 'Ticket not found'});
+                res.status(404).json({error: 'Ticket not found'});
+                return;
             }
 
             const oldStatus = existingTicket.status;
@@ -233,7 +268,8 @@ export async function updateTicketsTitle_Body_Status(req,res) {
 
             await enqueueJob('ticket_status_changed', { userId: ticketOwnerId, ticketId, oldStatus, newStatus: cleanStatus } );
 
-            return res.json({ok: true, data:updatedValue});
+            res.json({ok: true, data:updatedValue});
+            return;
 
         } else if (checkRole.role === 'user'){
 
@@ -246,7 +282,8 @@ export async function updateTicketsTitle_Body_Status(req,res) {
             );
 
             if (!existingTicket){
-                return res.status(404).json({error: 'Ticket not found'});
+                res.status(404).json({error: 'Ticket not found'});
+                return;
             }
 
             const oldTitle = existingTicket.title;
@@ -275,12 +312,14 @@ export async function updateTicketsTitle_Body_Status(req,res) {
                 `, [userId, 'ticket_title_body_updated', 'ticket', ticketId, JSON.stringify({title: oldTitle, body: oldBody}), JSON.stringify({title: cleanTitle, body: cleanBody})]
             );
 
-            return res.json({ok: true, data: updatedValue});
+            res.json({ok: true, data: updatedValue});
+            return;
         }
 
     } catch (error){
         console.error(error);
-        return res.status(500).json({error: 'Server failed. Please try again.'});
+        res.status(500).json({error: 'Server failed. Please try again.'});
+        return;
     }
     
 }

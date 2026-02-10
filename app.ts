@@ -24,10 +24,15 @@ const app = express();
 
 app.use(express.json());
 
+const sessionSecret = process.env.SESSION_SECRET;
+if (!sessionSecret){
+  throw new Error('SESSION_SECRET is not set');
+}
+
 app.use(
   session({
     name: "sid",
-    secret: process.env.SESSION_SECRET,
+    secret: sessionSecret,
     resave: false,
     saveUninitialized: false,
     cookie: {

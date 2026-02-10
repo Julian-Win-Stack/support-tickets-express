@@ -19,6 +19,6 @@
     "noEmit": false,
     "isolatedModules": true
   },
-  "include": ["**/*.ts", "**/*.js"],
+  "include": ["**/*.ts", "**/*.js", "**/*.d.ts"],
   "exclude": ["node_modules", "dist", "public"]
 }

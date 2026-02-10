@@ -170,16 +170,16 @@ noteSubmitForm.addEventListener('submit', async(e)=>{
     const addNoteTextarea = document.getElementById('add-note-textarea');
     const body = addNoteTextarea.value;
     addNoteBtn.disabled = true;
-    const ticketId = clickedTicketId;
+    const ticketId = Number(clickedTicketId);
     e.preventDefault();
     try{
-        const res = await fetch(`/api/notes`, {
+        const res = await fetch(`/api/notes`, { 
              method: 'POST',
              headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json', 
             },
             credentials: 'include',
-            body: JSON.stringify({ body, ticketId})
+            body: JSON.stringify({ body, cleanTicketId: ticketId})
 
         });
 
