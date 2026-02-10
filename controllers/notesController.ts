@@ -4,7 +4,6 @@ import type { Request, Response } from 'express';
 
 type CreateNotesBody = {
     body?: string;
-    cleanTicketId?: number;
 }
 export async function createNotes(req: Request, res: Response): Promise<void> {
     try{
@@ -23,21 +22,29 @@ export async function createNotes(req: Request, res: Response): Promise<void> {
             return;
         }
 
-        const { body = '', cleanTicketId = 0 } = req.body as CreateNotesBody;
+        const rawTicketId = req.params.ticketId;
+        const cleanTicketId = typeof rawTicketId === 'string' ? Number(rawTicketId.trim()) : Number('');
+
+        const { body = '' } = req.body as CreateNotesBody;
 
          const cleanBody = body.trim();
+         console.log('cleanBody', cleanBody);
+         console.log('cleanTicketId', cleanTicketId);
 
          if (!cleanBody){
+            console.log('Missing body');
             res.status(400).json({error: 'Missing inputs'});
             return;
         }
 
         if (!cleanTicketId){
+            console.log('Missing TicketId');
             res.status(400).json({error: 'Missing TicketId!'});
             return;
         }
 
         if (!Number.isInteger(cleanTicketId) || cleanTicketId < 1){
+            console.log('Invalid TicketId');
             res.status(400).json({error: 'Invalid TicketId!'});
             return;
         }

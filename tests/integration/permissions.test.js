@@ -135,9 +135,8 @@ describe('permissions', () => {
         it('admin can create a note and audit event is created', async () => {
             const agent = request.agent(app);
             await loginAsAdmin(agent);
-            const res = await agent.post('/api/notes').send({
+            const res = await agent.post(`/api/notes/${ticketId}`).send({
                 body: 'Note 2',
-                cleanTicketId: Number(ticketId),
             });
             expect(res.status).toBe(201);
             expect(res.body.ok).toBe(true);

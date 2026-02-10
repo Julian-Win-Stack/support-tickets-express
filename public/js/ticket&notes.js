@@ -173,14 +173,13 @@ noteSubmitForm.addEventListener('submit', async(e)=>{
     const ticketId = Number(clickedTicketId);
     e.preventDefault();
     try{
-        const res = await fetch(`/api/notes`, { 
+        const res = await fetch(`/api/notes/${ticketId}`, {
              method: 'POST',
              headers: {
-            'Content-Type': 'application/json', 
+            'Content-Type': 'application/json',
             },
             credentials: 'include',
-            body: JSON.stringify({ body, cleanTicketId: ticketId})
-
+            body: JSON.stringify({ body })
         });
 
         const data = await res.json();
