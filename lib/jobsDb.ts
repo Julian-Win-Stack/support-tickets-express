@@ -1,11 +1,11 @@
 import { getDB } from '../db/db.js';
+import type { Jobs, AdminStatusChangePayload } from '../db/types.js';
 
-/**
- * @param {string} type
- * @param {object} payload
- * @returns {Promise<number>} jobId
- */
-export async function enqueueJob(type, payload) {
+
+
+
+// type payload
+export async function enqueueJob(type: string, payload: AdminStatusChangePayload): Promise<number> {
     const db = getDB();
     const payloadJson = JSON.stringify(payload);
     const runAt = new Date().toISOString().slice(0, 19).replace('T', ' ');
@@ -13,17 +13,17 @@ export async function enqueueJob(type, payload) {
         INSERT INTO jobs (type, payload_json, status, run_at)
         VALUES (?, ?, 'queued', ?)
         `, [type, payloadJson, runAt]);
-    return result.lastID;
+    if (result.lastID) return result.lastID;
+    throw new Error('Failed to insert job');
 }
 
 
 /**
  * Atomically pick one runnable job and set its status to 'processing'.
  * "Runnable" = status is 'queued' and run_at is in the past.
- * @returns {Promise<{ id: number, type: string, payload_json: string } | null>} row or null if no runnable jobs are found
  */
 
-export async function claimNextRunnable() {
+export async function claimNextRunnable(): Promise<Pick<Jobs, 'id' | 'type' | 'payload_json'> | null> {
     const db = getDB();
     await db.run('BEGIN');
     try{
@@ -46,42 +46,41 @@ export async function claimNextRunnable() {
     }
 }
 
-export async function markSucceed(id) {
+export async function markSucceed(id: number): Promise<void> {
     const db = getDB();
-    await db.run(`
+    const result = await db.run(`
         UPDATE jobs SET status = 'succeeded', updated_at = datetime('now') WHERE id = ?
         `, [id]);
+    if (result.changes === 0){
+        throw new Error('Failed to update job');
+    }
 }
 
 
 
 /**
  * Record failure and either requeue with backoff or mark dead.
- * @param {number} id - Job id
- * @param {string} lastError - Error message to store
- * @param {{ requeue?: boolean }} options - If requeue true, put back in queue with delayed run_at; else mark dead
  */
-export async function markFailed(id, lastError, options = {}) {
+export async function markFailed(id: number, lastError: string, options: { requeue?: boolean } = {}): Promise<void> {
     const db = getDB();
     const { requeue = false } = options;
     const row = await db.get(`
         SELECT id, attempts, max_attempts, run_at FROM jobs WHERE id = ?
         `, [id]);
     if (!row){
-        return;
+        throw new Error('job not found');
     }
     const newAttempts = row.attempts + 1;
     if (requeue && newAttempts < row.max_attempts){
         const backoffTime = newAttempts === 1 ? 10 : 60;
-        const result = await db.run(`
+        await db.run(`
             UPDATE jobs SET status = 'queued', attempts = ?, run_at = datetime('now', ?), last_error = ?, updated_at = datetime('now') WHERE id = ?
             `, [newAttempts, `+${backoffTime} seconds`, lastError, id]);
-        return result.lastID;
+
     } else {
-        const result = await db.run(`
+        await db.run(`
             UPDATE jobs SET status = 'dead',attempts = ?, last_error = ?, updated_at = datetime('now') WHERE id = ?
             `, [newAttempts, lastError, id]);
-        return result.lastID;
     }
 }
 
@@ -89,7 +88,7 @@ export async function markFailed(id, lastError, options = {}) {
 /**
  * List jobs by status (for admin API). Default status 'dead'.
  */
-export async function listJobs(status = 'dead') {
+export async function listJobs(status = 'dead'): Promise<Jobs[]> {
     const db = getDB();
     const rows = await db.all(`
         SELECT * FROM jobs WHERE status = ? ORDER BY updated_at DESC

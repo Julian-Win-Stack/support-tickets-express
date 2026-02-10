@@ -1,6 +1,6 @@
-export function buildTicketConstraints(role, userId, cleanStatus, cleanSearch) {
-   const whereParts = [];
-   const userInput = [];
+export function buildTicketConstraints(role : string, userId : number, cleanStatus : string, cleanSearch : string): { whereParts : string[], userInput : (string | number)[] } {
+   const whereParts: string[] = [];
+   const userInput: (string | number)[] = [];
 
     if (role === 'user'){
         whereParts.push('T.user_id = ?');

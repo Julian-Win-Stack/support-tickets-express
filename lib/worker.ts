@@ -1,9 +1,10 @@
 import { claimNextRunnable, markSucceed, markFailed } from './jobsDb.js';
 import { getHandler } from './jobHandlers.js';
 
-let workerIntervalId = null;
+let workerIntervalId: NodeJS.Timeout | null = null;
 
-export async function tick() {
+
+export async function tick(): Promise<void> {
     const job = await claimNextRunnable();
     if (!job) return;
     const handler = getHandler(job.type);
@@ -14,9 +15,10 @@ export async function tick() {
 
     try {
         await handler(JSON.parse(job.payload_json));
-    } catch (error) {
-        console.error('Worker job failed:', job.id, error.message, error);
-        await markFailed(job.id, error.message, { requeue: true });
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.error('Worker job failed:', job.id, message, error);
+        await markFailed(job.id, message, { requeue: true });
         return;
     }
 
@@ -24,15 +26,15 @@ export async function tick() {
 } 
 
 
-export function startWorker(pollIntervalMs) {
+export function startWorker(pollIntervalMs: number): void {
     workerIntervalId = setInterval(async ()=>{
-        await tick().catch(error => {
+        await tick().catch((error: unknown) => {
             console.error('Worker error:', error);
         });
     }, pollIntervalMs);
 }
 
-export function stopWorker() {
+export function stopWorker(): void {
     if (workerIntervalId) {
         clearInterval(workerIntervalId);
         workerIntervalId = null;
