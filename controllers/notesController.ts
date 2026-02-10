@@ -75,7 +75,9 @@ export async function createNotes(req: Request, res: Response): Promise<void> {
 export async function getNotes(req: Request, res: Response): Promise<void> {
     const db = getDB();
 
-    const numberedId = Number(req.params.id as string);
+    // const numberedId = Number(req.params.id as string);
+    const rawNumberedId = req.params.id;
+    const numberedId = typeof rawNumberedId === 'string' ? Number(rawNumberedId.trim()) : Number('');
 
     if (!Number.isInteger(numberedId) || numberedId < 1){
         res.status(400).json({error: 'Invalid TicketId!'});

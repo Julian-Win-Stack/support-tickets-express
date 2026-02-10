@@ -69,7 +69,10 @@ export async function getTickets(req: Request, res: Response): Promise<void> {
         const db = getDB();
         const userId = req.session.userId as number;
 
-        const { status = '', search = ''} = req.query as GetTicketsQuery;
+        const rawStatus = req.query.status;
+        const rawSearch = req.query.search;
+        const status = typeof rawStatus === 'string' ? rawStatus.trim().toLowerCase() : '';
+        const search = typeof rawSearch === 'string' ? rawSearch.trim() : '';
         const cleanStatus = (status.trim()).toLowerCase();
         const cleanSearch = search.trim();
 
@@ -125,7 +128,8 @@ export async function getTicketsById(req: Request, res: Response): Promise<void>
     try{
         const db = getDB();
 
-        const ticketId = Number(req.params.id as string);
+        const rawTicketId = req.params.id;
+        const ticketId = typeof rawTicketId === 'string' ? Number(rawTicketId.trim()) : Number('');
 
         if (!Number.isInteger(ticketId) || ticketId < 1){
             res.status(400).json({error: 'Invalid ticket id'});
@@ -189,8 +193,10 @@ export async function updateTicketsTitle_Body_Status(req: Request, res: Response
     try{
         const db = getDB();
 
-        const ticketId = Number(req.params.id as string);
-        if (!Number.isInteger(ticketId) || ticketId <= 0){
+        const rawTicketId = req.params.id;
+        const ticketId = typeof rawTicketId === 'string' ? Number(rawTicketId.trim()) : Number('');
+
+        if (!Number.isInteger(ticketId) || ticketId < 1){
             res.status(400).json({error: 'Invalid ticket id'});
             return;
         }

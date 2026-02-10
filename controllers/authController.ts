@@ -19,7 +19,7 @@ export async function registerUser(req: Request, res: Response): Promise<void> {
         const { registerName = '', registerEmail = '', registerPassword = '' } = req.body as RegisterUserBody;
     
         const cleanName = registerName.trim();
-        const cleanEmail = registerEmail.trim();
+        const cleanEmail = registerEmail.trim().toLowerCase();
     
         if (!cleanName || !cleanEmail || !registerPassword){
             res.status(400).json({error: 'Missing input fields'});
@@ -62,20 +62,25 @@ export async function registerUser(req: Request, res: Response): Promise<void> {
         return;
     }
 }
-
+type LoginUserDbRow = {
+    password_hash: string;
+    id: number;
+    name: string;
+    role: string;
+}
 export async function loginUser(req: Request, res: Response): Promise<void> {
     try{
         const db = getDB();
         const { loginEmail = '', loginPassword = '' } = req.body as LoginUserBody;
     
-        const cleanEmail = loginEmail.trim();
+        const cleanEmail = loginEmail.trim().toLowerCase();
     
         if (!cleanEmail || !loginPassword){
             res.status(400).json({error: 'Missing input fields'});
             return;
         }
 
-        const dbRow = await db.get(`
+        const dbRow : LoginUserDbRow | undefined = await db.get(`
             SELECT password_hash, id, name, role FROM users 
             WHERE email = ?
             `, [cleanEmail]);
@@ -94,16 +99,24 @@ export async function loginUser(req: Request, res: Response): Promise<void> {
             return;
         }
 
-        req.session.userId = dbRow.id;
+        req.session.regenerate(async (error)=>{
+            if (error){
+                console.error(error);
+                res.status(500).json({error: 'Login failed. Please try again.'});
+                return;
+            }
+            req.session.userId = dbRow.id;
 
-        await db.run(
-            `INSERT INTO audit_events (actor_user_id, action, entity_type, entity_id, after)
-            VALUES (?, ?, ?, ?, ?)
-            `, [dbRow.id, 'user_logged_in', 'user', dbRow.id, JSON.stringify({ authenticated: true })]
-        );
+            await db.run(
+                `INSERT INTO audit_events (actor_user_id, action, entity_type, entity_id, after)
+                VALUES (?, ?, ?, ?, ?)
+                `, [dbRow.id, 'user_logged_in', 'user', dbRow.id, JSON.stringify({ authenticated: true })]
+            );
+            
+            res.json({ok: true, name: dbRow.name, role: dbRow.role});
+            return;
+        });
 
-        res.json({ok: true, name: dbRow.name, role: dbRow.role});
-        return;
 
     }catch (error){
         console.error(error);
@@ -147,17 +160,25 @@ export async function logoutUser(req: Request, res: Response): Promise<void> {
         return;
         });
 }
-
+type CheckMeDbRow = {
+    name: string;
+    role: string;
+}
 export async function checkMe(req: Request, res: Response): Promise<void> {
     const userId = req.session.userId;
 
     if (userId){
         const db = getDB();
 
-        const dbRow = await db.get(`
+        const dbRow : CheckMeDbRow | undefined = await db.get(`
             SELECT name, role FROM users
             WHERE users.id = ?
             `, [userId]);
+
+        if (!dbRow){
+            res.json({ok: false});
+            return;
+        }
 
         res.json({ok: true, name: dbRow.name, role: dbRow.role});
         return;

@@ -7,10 +7,21 @@ import type { Request, Response } from 'express';
  * List jobs by status. Default status 'dead'.
  */
 export async function listJobs(req: Request, res: Response): Promise<void> {
-    const status  = (req.query.status as string) || 'dead';
+    try { 
+    const rawStatus = req.query.status;
+    const status = typeof rawStatus === 'string' ? rawStatus.trim().toLowerCase() : 'dead';
+    if (status !== 'dead' && status !== 'queued' && status !== 'processing' && status !== 'succeeded'){
+        res.status(400).json({ error: 'Invalid status' });
+        return;
+    }
     const rows = await jobsDb.listJobs(status);
     res.json({ data: rows });
     return;
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server failed. Please try again.' });
+        return;
+    }
 }
 
 /**
@@ -19,7 +30,8 @@ export async function listJobs(req: Request, res: Response): Promise<void> {
  * Otherwise: list latest 50 across all users.
  */
 export async function listNotifications(req: Request, res: Response): Promise<void> {
-    const userId = req.query.user_id;
+    const rawUserId = req.query.user_id;
+    const userId = typeof rawUserId === 'string' ? rawUserId.trim() : undefined;
     if (userId) {
         const id = Number(userId);
         if (!Number.isInteger(id) || id < 1) {
