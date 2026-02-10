@@ -121,22 +121,31 @@ export async function logoutUser(req: Request, res: Response): Promise<void> {
     }
     const userId = req.session.userId;
 
-    req.session.destroy( (error)=>{
+    req.session.destroy( async (error)=>{
         if (error){
             console.error(error);
             res.status(500).json({error: 'User failed to logout. Please try again.'});
             return;
         }
-    res.clearCookie('sid');
-    });
-    const db = getDB();
-    await db.run(
-        `INSERT INTO audit_events (actor_user_id, action, entity_type, entity_id, after)
-        VALUES (?, ?, ?, ?, ?)
-        `, [userId, 'user_logged_out', 'user', userId, JSON.stringify({ authenticated: false })]
-    );
-    res.json({ok: true});
-    return;
+        res.clearCookie('sid');
+
+        try {
+        const db = getDB();
+        await db.run(
+            `INSERT INTO audit_events (actor_user_id, action, entity_type, entity_id, after)
+            VALUES (?, ?, ?, ?, ?)
+            `, [userId, 'user_logged_out', 'user', userId, JSON.stringify({ authenticated: false })]
+        );
+
+        } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'User failed to logout. Please try again.' });
+        return;
+        }
+        
+        res.json({ ok: true });
+        return;
+        });
 }
 
 export async function checkMe(req: Request, res: Response): Promise<void> {
