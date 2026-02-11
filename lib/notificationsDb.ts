@@ -5,15 +5,18 @@ import type { Notifications } from '../db/types.js';
 /**
  * Insert one notification (e.g. "mock email" for a user).
  */
-export async function sendNotification(userId: number, channel: string, subject: string, message: string, status: string = 'pending'): Promise<number> {
+export async function sendNotification(userId: number, channel: string, subject: string, message: string, status: string = 'pending', jobId: number): Promise<void> {
+    try{
     const db = getDB();
-    const result = await db.run(`
-        INSERT INTO notifications (user_id, channel, subject, message, status)
-        VALUES (?, ?, ?, ?, ?)
-        `, [userId, channel, subject, message, status]);
-
-    if (result.lastID) return result.lastID;
-    throw new Error('Failed to insert notification');
+    await db.run(`
+        INSERT OR IGNORE INTO notifications (user_id, channel, subject, message, status, job_id)
+        VALUES (?, ?, ?, ?, ?, ?)
+        `, [userId, channel, subject, message, status, jobId]);
+        return
+    }catch (error){
+        console.error('Failed to insert notification', error);
+        throw new Error('Failed to insert notification');
+    }
 }
 
 

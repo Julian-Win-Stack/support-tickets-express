@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { getDBConnection } from "./db/db.js";
-const tableName = 'jobs';
+const tableName = 'notifications';
 
 // Uses test.db when NODE_ENV=test, otherwise app.db. To see jobs from test-jobsDb script, run: NODE_ENV=test node logTable.js
 async function logTable() {

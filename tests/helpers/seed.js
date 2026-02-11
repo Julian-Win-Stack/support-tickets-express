@@ -22,6 +22,7 @@ export async function seed() {
 
     const userAId = await db.get(`SELECT id FROM users WHERE email = ?`, [USERA_EMAIL]);
     const userBId = await db.get(`SELECT id FROM users WHERE email = ?`, [USERB_EMAIL]);
+    const adminId = await db.get(`SELECT id FROM users WHERE email = ?`, [ADMIN_EMAIL]);
 
     await db.run(`
         INSERT INTO tickets (user_id, title, body, status) VALUES (?, ?, ?, ?)`,
@@ -32,17 +33,21 @@ export async function seed() {
         INSERT INTO tickets (user_id, title, body, status) VALUES (?, ?, ?, ?)`,
         [userBId.id, 'Ticket 2B', 'Ticket 2B body', 'open'],
     );
+    await db.run(`
+        INSERT INTO tickets (user_id, title, body, status) VALUES (?, ?, ?, ?)`,
+        [adminId.id, 'Ticket 3', 'Ticket 3 body', 'open'],
+    );
 
     const ticketId = await db.get(`SELECT id FROM tickets WHERE user_id = ?`, [userAId.id]);
     const ticketBId = await db.get(`SELECT id FROM tickets WHERE user_id = ?`, [userBId.id]);
+    const ticketAdminId = await db.get(`SELECT id FROM tickets WHERE user_id = ?`, [adminId.id]);
 
-    const adminId = await db.get(`SELECT id FROM users WHERE email = ?`, [ADMIN_EMAIL]);
     await db.run(`
         INSERT INTO notes (ticket_id, admin_id, body) VALUES (?, ?, ?)`,
         [ticketId.id, adminId.id, 'Note 1'],
     );
 
-    return { ticketId: ticketId.id, adminId: adminId.id, userAId: userAId.id, userBId: userBId.id, ticketBId: ticketBId.id };
+    return { ticketId: ticketId.id, adminId: adminId.id, userAId: userAId.id, userBId: userBId.id, ticketBId: ticketBId.id, ticketAdminId: ticketAdminId.id };
 }
 
 

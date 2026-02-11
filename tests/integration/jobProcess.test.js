@@ -5,6 +5,7 @@ import { getDB } from '../../db/db.js';
 import { loginAsAdmin } from '../helpers/authHelpers.js';
 import { seed } from '../helpers/seed.js';
 import { tick } from '../../lib/worker.js';
+import { getHandler } from '../../lib/jobHandlers.js';
 
 describe('jobProcess', () => {
     /** @type {number} */
@@ -16,11 +17,15 @@ describe('jobProcess', () => {
     /** @type {number} */
     let ticketBId;
 
+    /** @type {number} */
+    let ticketAdminId;
+
     beforeAll(async () => {
         const ids = await seed();
         adminId = ids.adminId;
         userBId = ids.userBId;
         ticketBId = ids.ticketBId;
+        ticketAdminId = ids.ticketAdminId;
     });
 
     describe('admin status change', () => {
@@ -44,5 +49,35 @@ describe('jobProcess', () => {
             expect(notificationRow).toBeDefined();
             expect(notificationRow.status).toBe('sent');
         });
+        it('is idempotent: processing the same job twice does not create duplicate notifications', async () => {
+            const agent = request.agent(app);
+            await loginAsAdmin(agent);
+            const res = await agent
+                .patch(`/api/ticket/${ticketAdminId}`)
+                .send({ status: 'resolved' });
+            expect(res.status).toBe(200);
+            expect(res.body.data.status).toBe('resolved');
+
+            await tick();
+            const db = getDB();
+
+            const jobRow = await db.get(`
+                SELECT * FROM jobs
+                WHERE type = ? AND payload_json = ? AND status = ? LIMIT 1
+                `, ['ticket_status_changed', JSON.stringify({ userId: adminId, ticketId: ticketAdminId, oldStatus: 'open', newStatus: 'resolved' }), 'succeeded']);
+            expect(jobRow).toBeDefined();
+            
+            const jobId = jobRow.id;
+            const handler = getHandler('ticket_status_changed');
+            await handler({ userId: adminId, ticketId: ticketAdminId, oldStatus: 'open', newStatus: 'resolved' }, jobId);
+            const notificationRow = await db.all(`
+                SELECT * FROM notifications
+                WHERE job_id = ?
+                `, [jobId]);
+            console.log('notificationRow', notificationRow);
+            expect(notificationRow.length).toBe(1);
+            expect(notificationRow[0].status).toBe('sent');
+        });
     });
+
 });

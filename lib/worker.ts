@@ -14,7 +14,7 @@ export async function tick(): Promise<void> {
     }
 
     try {
-        await handler(JSON.parse(job.payload_json));
+        await handler(JSON.parse(job.payload_json), job.id);
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : String(error);
         console.error('Worker job failed:', job.id, message, error);

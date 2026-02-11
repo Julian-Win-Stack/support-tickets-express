@@ -54,6 +54,7 @@ CREATE TABLE IF NOT EXISTS jobs (
 
 CREATE INDEX IF NOT EXISTS idx_jobs_status_run_at ON jobs (status, run_at);
 
+-- job_id (UNIQUE) is added by migration 001_add_job_id_to_notifications.sql
 CREATE TABLE IF NOT EXISTS notifications (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
