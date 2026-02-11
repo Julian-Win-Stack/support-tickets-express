@@ -100,6 +100,10 @@ export async function getTickets(req: Request, res: Response): Promise<void> {
         const totalTicketSqliteCode = plainWhereParts.length > 0 ? countTicketSqliteCode + ' WHERE ' + plainWhereParts.join(' AND ') : countTicketSqliteCode;
 
         const totalTicketRow = await db.get(totalTicketSqliteCode, plainUserInput);
+        if (!totalTicketRow){
+            res.status(404).json({error: 'No tickets found'});
+            return;
+        }
         const numberOfTotalTicket = totalTicketRow.total_tickets;
 
         const { whereParts, userInput } = buildTicketConstraints(roleRow.role, userId, cleanStatus, cleanSearch);

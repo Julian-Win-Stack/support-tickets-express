@@ -146,7 +146,7 @@ describe('permissions', () => {
                 `SELECT * FROM audit_events
                  WHERE entity_type = 'notes' AND entity_id = ? AND action = 'note_created' AND actor_user_id = ?
                  ORDER BY id DESC LIMIT 1`,
-                [ticketId, adminId]
+                [res.body.noteId, adminId]
             );
             expect(auditRow).toBeDefined();
             expect(auditRow.after).toBe('Note 2');

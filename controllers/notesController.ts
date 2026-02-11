@@ -10,17 +10,6 @@ export async function createNotes(req: Request, res: Response): Promise<void> {
         const db = getDB();
         const userId = req.session.userId;
 
-        const isAdminRow = await db.get(`SELECT role FROM users WHERE id = ?`, [userId]);
-
-        if (!isAdminRow){
-            res.status(401).json({ error: 'Unauthorized. Please log in again.'});
-            return;
-        }
-
-        if (isAdminRow.role !== 'admin'){
-            res.status(403).json({error: 'Forbidden! Only admins are allowed to add notes.'});
-            return;
-        }
 
         const rawTicketId = req.params.ticketId;
         const cleanTicketId = typeof rawTicketId === 'string' ? Number(rawTicketId.trim()) : Number('');
@@ -28,23 +17,18 @@ export async function createNotes(req: Request, res: Response): Promise<void> {
         const { body = '' } = req.body as CreateNotesBody;
 
          const cleanBody = body.trim();
-         console.log('cleanBody', cleanBody);
-         console.log('cleanTicketId', cleanTicketId);
 
          if (!cleanBody){
-            console.log('Missing body');
             res.status(400).json({error: 'Missing inputs'});
             return;
         }
 
         if (!cleanTicketId){
-            console.log('Missing TicketId');
             res.status(400).json({error: 'Missing TicketId!'});
             return;
         }
 
         if (!Number.isInteger(cleanTicketId) || cleanTicketId < 1){
-            console.log('Invalid TicketId');
             res.status(400).json({error: 'Invalid TicketId!'});
             return;
         }
@@ -58,18 +42,19 @@ export async function createNotes(req: Request, res: Response): Promise<void> {
             return;
         }
 
-        await db.run(
+        const result = await db.run(
             `INSERT INTO notes (ticket_id, admin_id, body)
             VALUES (? , ?, ?)
             `, [cleanTicketId, userId, cleanBody]
         );
+
         await db.run(
             `INSERT INTO audit_events (actor_user_id, action, entity_type, entity_id, after)
             VALUES (?, ?, ?, ?, ?)
-            `, [userId, 'note_created', 'notes', cleanTicketId, cleanBody]
+            `, [userId, 'note_created', 'notes', result.lastID, cleanBody]
         );
 
-        res.status(201).json({ok: true});
+        res.status(201).json({ok: true, noteId: result.lastID});
         return;
 
     }catch (error){
@@ -80,9 +65,7 @@ export async function createNotes(req: Request, res: Response): Promise<void> {
 }
 
 export async function getNotes(req: Request, res: Response): Promise<void> {
-    const db = getDB();
-
-    // const numberedId = Number(req.params.id as string);
+    
     const rawNumberedId = req.params.id;
     const numberedId = typeof rawNumberedId === 'string' ? Number(rawNumberedId.trim()) : Number('');
 
@@ -90,30 +73,23 @@ export async function getNotes(req: Request, res: Response): Promise<void> {
         res.status(400).json({error: 'Invalid TicketId!'});
         return;
     }   
-
-    const userId = req.session.userId;
-    const isAdminRow = await db.get(`SELECT role FROM users WHERE id = ?`, [userId]);
-
-    if (!isAdminRow){
-        res.status(401).json({ error: 'Unauthorized. Please log in again.'});
+    
+    try{
+        const db = getDB();
+        const notesArray = await db.all(
+            `SELECT N.created_at, N.body, U.name 
+            FROM notes N
+            JOIN users U
+            ON N.admin_id = U.id
+            WHERE N.ticket_id = ?
+            `, [numberedId]
+        );
+        
+        res.json({data: notesArray});
+        return;
+    }catch (error){
+        console.error(error);
+        res.status(500).json({error: 'Server failed. Please try again.'});
         return;
     }
-
-    if (isAdminRow.role !== 'admin'){
-        res.status(403).json({error: 'Forbidden! Only admins are allowed to notes.'});
-        return;
-    }
-
-    const notesArray = await db.all(
-        `SELECT N.created_at, N.body, U.name 
-        FROM notes N
-        JOIN users U
-        ON N.admin_id = U.id
-        WHERE N.ticket_id = ?
-        `, [numberedId]
-    );
-    
-    res.json({data: notesArray});
-    return;
-    
 }
