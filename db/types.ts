@@ -65,3 +65,12 @@ export type AdminStatusChangePayload ={
     oldStatus: string;
     newStatus: string;
 }
+
+export type TicketAssignedPayload ={
+    ticketId: number;
+    assignedAdminId: number;
+    assignedByAdminId: number;
+    oldAssignedAdminId: number | null;
+}
+
+export type PayloadUnion = AdminStatusChangePayload | TicketAssignedPayload;

@@ -1,11 +1,11 @@
 import { getDB } from '../db/db.js';
-import type { Jobs, AdminStatusChangePayload } from '../db/types.js';
-
+import type { Jobs, PayloadUnion } from '../db/types.js';
+// you are here right now. you have to use union for AdminStatusChangePayloadx
 
 
 
 // type payload
-export async function enqueueJob(type: string, payload: AdminStatusChangePayload): Promise<number> {
+export async function enqueueJob(type: string, payload: PayloadUnion): Promise<number> {
     const db = getDB();
     const payloadJson = JSON.stringify(payload);
     const runAt = new Date().toISOString().slice(0, 19).replace('T', ' ');

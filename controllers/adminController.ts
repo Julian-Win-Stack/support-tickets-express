@@ -1,7 +1,7 @@
 import * as jobsDb from '../lib/jobsDb.js';
 import { getNotificationsByUser, listLatestNotifications } from '../lib/notificationsDb.js';
 import type { Request, Response } from 'express';
-
+import { getDB } from '../db/db.js';
 /**
  * GET /api/admin/jobs?status=dead
  * List jobs by status. Default status 'dead'.
@@ -45,4 +45,21 @@ export async function listNotifications(req: Request, res: Response): Promise<vo
     const rows = await listLatestNotifications(50);
     res.json({ data: rows });
     return;
+}
+
+/**
+ * GET /api/admin/users
+ * List all users.
+ */
+export async function listUsers(req: Request, res: Response): Promise<void> {
+    try {
+        const db = getDB();
+        const admins = await db.all(`SELECT id, name, email, role FROM users WHERE role = 'admin'`);
+        res.json({ data: admins });
+        return;
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server failed. Please try again.' });
+        return;
+    }
 }

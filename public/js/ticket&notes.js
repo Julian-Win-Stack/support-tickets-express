@@ -17,15 +17,21 @@ const adminNotesSection = document.getElementById('admin-notes-section');
 const notesHeading = document.getElementById('notes-heading');
 const noteSubmitForm = document.getElementById('note-submit-form');
 const addNoteBtn = document.getElementById('add-note-btn');
-
+const assignAdminDropdownTriggerBtn = document.getElementById('assign-admin-dropdown-trigger-btn');
+const assignAdminDropdownMenu = document.getElementById('assign-admin-dropdown-menu');
+const adminViewDropdownWrapper = document.getElementById('admin-view-dropdown-wrapper');
+const adminViewDropdownTriggerBtn = document.getElementById('admin-view-dropdown-trigger-btn');
+const adminViewDropdownMenu = document.getElementById('admin-view-dropdown-menu');
 
 // state
 let clickedTicketId;
+let adminViewCondition = '';
 
 
 // init
 await toggleStatusRadio();
-
+await toggleAssignAdminDropdown();
+await toggleAdminViewDropdown();
 
 
 
@@ -130,8 +136,8 @@ document.addEventListener('click', async(e)=>{
                     document.getElementById('admin-view-title').textContent = data.data.title;
                     document.getElementById('admin-view-body').textContent = data.data.body;
                     adminNotesSection.style.display = 'block';
-                    // renderNotesArea.innerHTML = '';
-                    // notesHeading.textContent = '';
+                    const assignLabel = data.data.assigned_admin_name ? `Assigned to: ${data.data.assigned_admin_name}` : 'Assign to...';
+                    assignAdminDropdownTriggerBtn.innerHTML = assignLabel + ' <span class="assign-dropdown-chevron"></span>';
                     const noteData = await getNotes();
                     renderNotes(noteData);
                 }
@@ -157,6 +163,8 @@ searchBar.addEventListener('input', eventHandler);
 refreshBtn.addEventListener('click', ()=>{
     selectStatus.value = '';
     searchBar.value = '';
+    adminViewCondition = '';
+    adminViewDropdownTriggerBtn.innerHTML = 'View <span class="assign-dropdown-chevron"></span>';
     eventHandler();
 })
 
@@ -203,6 +211,58 @@ noteSubmitForm.addEventListener('submit', async(e)=>{
 })
 
 
+// Eventlistener (Assign Admin Dropdown)
+assignAdminDropdownTriggerBtn.addEventListener('click', async(e)=>{
+    
+    try{
+        assignAdminDropdownTriggerBtn.disabled = true;
+        const data = await getAdmins();
+        renderAdmins(data);
+    } catch (error){
+        saveEditStatusEl.textContent = error.message;
+        console.error(error);
+    } finally{
+        assignAdminDropdownTriggerBtn.disabled = false;
+    }
+
+})
+
+// Event delegation: when a dropdown item (admin or Unassigned) is clicked, assign the ticket
+assignAdminDropdownMenu.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.assign-dropdown-item');
+    if (!btn) return;
+
+    if (!clickedTicketId) {
+        saveEditStatusEl.textContent = 'Select a ticket first';
+        return;
+    }
+
+    const adminIdRaw = btn.dataset.adminId;
+    const adminId = adminIdRaw && adminIdRaw !== '' ? Number(adminIdRaw) : null;
+    const adminName = btn.textContent;
+
+    try {
+        const res = await fetch(`/api/ticket/${clickedTicketId}/assign`, {
+            method: 'PATCH',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ assigned_admin_id: adminId }),
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+            assignAdminDropdownTriggerBtn.innerHTML = (adminName === 'Unassigned' ? 'Assign to...' : `Assigned to: ${adminName}`) + ' <span class="assign-dropdown-chevron"></span>';
+            eventHandler();
+            saveEditStatusEl.textContent = 'Assignment updated';
+        } else {
+            throw new Error(data.error || 'Failed to assign ticket');
+        }
+    } catch (error) {
+        saveEditStatusEl.textContent = error.message;
+        console.error(error);
+    }
+})
+
 
 
 // Ticket functions
@@ -210,7 +270,7 @@ noteSubmitForm.addEventListener('submit', async(e)=>{
 async function eventHandler(){
     const statusValue = selectStatus.value;
     const searchValue = searchBar.value;
-    const data = await getTickets(statusValue, searchValue)
+    const data = await getTickets(statusValue, searchValue, adminViewCondition)
     renderTickets(data)
 }
 
@@ -242,12 +302,12 @@ export function renderTickets(data) {
 
 }
 
-export async function getTickets(status, search) {
+export async function getTickets(status, search, adminView = '') {
     const fetchEndpointArray = ['/api/ticket'];
     const queryArray = [];
     let finalFetchEndpoint;
 
-    if (status || search){
+    if (status || search || adminView){
         fetchEndpointArray.push('?');
     }
 
@@ -259,16 +319,15 @@ export async function getTickets(status, search) {
         queryArray.push(`search=${search}`);
     }
 
-    if (queryArray.length === 1){
-        fetchEndpointArray.push(queryArray[0]);
-        finalFetchEndpoint = fetchEndpointArray.join('');
+    if (adminView){
+        queryArray.push(`admin_view_condition=${adminView}`);
+    }
 
-    }else if (queryArray.length === 2){
+    if (queryArray.length > 0){
         const finalQueryArray = queryArray.join('&');
         fetchEndpointArray.push(finalQueryArray);
         finalFetchEndpoint = fetchEndpointArray.join('');
-
-    }else {
+    } else {
         finalFetchEndpoint = fetchEndpointArray[0];
     }
 
@@ -302,6 +361,7 @@ async function toggleStatusRadio() {
         document.getElementById('edit-user-area').style.display = 'none';
     }
 }
+
 
 
 
@@ -355,3 +415,56 @@ function renderNotes(data){
     notesHeading.textContent = 'Notes';
 }
 
+
+
+// Admin Functions
+
+async function toggleAssignAdminDropdown() {
+    const data = await getRole();
+    const role = data.role;
+    if (role === 'admin'){
+        document.getElementById('assign-admin-dropdown').style.display = 'block';
+    } else {
+        document.getElementById('assign-admin-dropdown').style.display = 'none';
+    }
+}
+
+async function toggleAdminViewDropdown() {
+    const data = await getRole();
+    const role = data.role;
+    if (role === 'admin'){
+        adminViewDropdownWrapper.style.display = 'block';
+    } else {
+        adminViewDropdownWrapper.style.display = 'none';
+    }
+}
+
+// Event delegation: when admin view dropdown option is clicked, filter tickets
+adminViewDropdownMenu.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.assign-dropdown-item');
+    if (!btn) return;
+
+    const value = btn.dataset.adminView;
+    if (!value) return;
+
+    adminViewCondition = value;
+    const label = value === 'me' ? 'My assigned tickets' : 'Unassigned tickets';
+    adminViewDropdownTriggerBtn.innerHTML = label + ' <span class="assign-dropdown-chevron"></span>';
+    eventHandler();
+})
+
+async function getAdmins() {
+    const res = await fetch('/api/admin/users', {credentials: 'include'});
+    const data = await res.json();
+    return data;
+}
+
+async function renderAdmins(data) {
+    const admins = data.data;
+    const assignAdminDropdownMenu = document.getElementById('assign-admin-dropdown-menu');
+    assignAdminDropdownMenu.innerHTML = '';
+    admins.forEach(admin => {
+        assignAdminDropdownMenu.innerHTML += `<button type="button" class="assign-dropdown-item" data-admin-id="${admin.id}">${admin.name}</button>`;
+    });
+    assignAdminDropdownMenu.innerHTML += `<button type="button" class="assign-dropdown-item" data-admin-id="">Unassigned</button>`;
+}

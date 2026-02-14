@@ -1,4 +1,4 @@
-export function buildTicketConstraints(role : string, userId : number, cleanStatus : string, cleanSearch : string): { whereParts : string[], userInput : (string | number)[] } {
+export function buildTicketConstraints(role : string, userId : number, cleanStatus : string, cleanSearch : string, adminViewCondition : string): { whereParts : string[], userInput : (string | number)[] } {
    const whereParts: string[] = [];
    const userInput: (string | number)[] = [];
 
@@ -7,6 +7,15 @@ export function buildTicketConstraints(role : string, userId : number, cleanStat
         userInput.push(userId);
     }
 
+    if (adminViewCondition === 'me'){
+        whereParts.push('T.assigned_admin_id = ?');
+        userInput.push(userId);
+    }
+
+    if (adminViewCondition === 'unassigned'){
+        whereParts.push('T.assigned_admin_id IS NULL');
+    }
+    
     if (cleanStatus){
         whereParts.push('T.status = ?');
         userInput.push(cleanStatus);

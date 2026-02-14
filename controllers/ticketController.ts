@@ -71,11 +71,25 @@ export async function getTickets(req: Request, res: Response): Promise<void> {
 
         const rawStatus = req.query.status;
         const rawSearch = req.query.search;
-        const status = typeof rawStatus === 'string' ? rawStatus.trim().toLowerCase() : '';
-        const search = typeof rawSearch === 'string' ? rawSearch.trim() : '';
-        const cleanStatus = (status.trim()).toLowerCase();
-        const cleanSearch = search.trim();
 
+        if (req.query.admin_view_condition){
+            const row = await db.get('SELECT role FROM users WHERE id = ?', [userId]);
+            if (!row || row.role !== 'admin') {
+                res.status(403).json({ error: 'Admin only' });
+                return;
+            }
+        }
+
+        const rawAdminViewCondition = req.query.admin_view_condition;
+        const cleanStatus = typeof rawStatus === 'string' ? rawStatus.trim().toLowerCase() : '';
+        const cleanSearch = typeof rawSearch === 'string' ? rawSearch.trim() : '';
+        const adminViewCondition = typeof rawAdminViewCondition === 'string' ? rawAdminViewCondition.trim().toLowerCase() : '';
+ 
+        if (adminViewCondition !== '' && adminViewCondition !== 'me' && adminViewCondition !== 'unassigned'){
+            res.status(400).json({error: 'Invalid admin view condition'});
+            return;
+        }
+        
         const roleRow = await db.get(
             `SELECT role 
             FROM users 
@@ -93,7 +107,7 @@ export async function getTickets(req: Request, res: Response): Promise<void> {
                 FROM tickets T
                 JOIN users U ON T.user_id = U.id`];
 
-        const { whereParts:plainWhereParts, userInput:plainUserInput } = buildTicketConstraints(roleRow.role, userId, '', '');
+        const { whereParts:plainWhereParts, userInput:plainUserInput } = buildTicketConstraints(roleRow.role, userId, '', '', '');
 
         const countTicketSqliteCode = 'SELECT COUNT(*) AS total_tickets FROM tickets T';
 
@@ -106,7 +120,7 @@ export async function getTickets(req: Request, res: Response): Promise<void> {
         }
         const numberOfTotalTicket = totalTicketRow.total_tickets;
 
-        const { whereParts, userInput } = buildTicketConstraints(roleRow.role, userId, cleanStatus, cleanSearch);
+        const { whereParts, userInput } = buildTicketConstraints(roleRow.role, userId, cleanStatus, cleanSearch, adminViewCondition);
 
         if (whereParts.length > 0){
             baseSqliteCode.push('WHERE');
@@ -151,9 +165,12 @@ export async function getTicketsById(req: Request, res: Response): Promise<void>
         if (checkAdminRow.role === 'admin'){
 
             const ticketRow = await db.get(
-                `SELECT T.*, U.email FROM tickets T
-                JOIN users U ON T.user_id = U.id WHERE 
-                T.id = ?`, [ticketId]
+                `SELECT T.*, U.email,
+                 A.name AS assigned_admin_name
+                 FROM tickets T
+                 JOIN users U ON T.user_id = U.id
+                 LEFT JOIN users A ON T.assigned_admin_id = A.id
+                 WHERE T.id = ?`, [ticketId]
             );
         
             if (!ticketRow){
@@ -332,4 +349,88 @@ export async function updateTicketsTitle_Body_Status(req: Request, res: Response
         return;
     }
     
+}
+
+export async function assignTicket(req: Request, res: Response): Promise<void> {
+    try{
+        const db = getDB();
+
+        const rawTicketId = req.params.id;
+        const ticketId = typeof rawTicketId === 'string' ? Number(rawTicketId.trim()) : Number('');
+
+        if (!Number.isInteger(ticketId) || ticketId < 1){
+            res.status(400).json({error: 'Invalid ticket id'});
+            return;
+        }
+
+        const userId = req.session.userId;
+        const rawAssignedAdminId = req.body.assigned_admin_id;
+
+        const ticketRow = await db.get(`
+            SELECT user_id, assigned_admin_id FROM tickets WHERE id = ?
+            `, [ticketId]);
+        
+        if (!ticketRow){
+            res.status(404).json({error: 'Ticket not found'});
+            return;
+        }
+
+        let assignedAdminId: number | null = null;
+        if (rawAssignedAdminId === null || rawAssignedAdminId === undefined || rawAssignedAdminId === '') {
+            assignedAdminId = null;
+        } else {
+            const parsed = Number(rawAssignedAdminId);
+            if (!Number.isInteger(parsed) || parsed < 1) {
+                res.status(400).json({error: 'Invalid admin id'});
+                return;
+            }
+            const adminRow = await db.get(`
+                SELECT id FROM users WHERE id = ? AND role = 'admin'
+                `, [parsed]);
+            if (!adminRow) {
+                res.status(404).json({error: 'Admin not found'});
+                return;
+            }
+            assignedAdminId = parsed;
+        }
+
+        if (ticketRow.assigned_admin_id === assignedAdminId){
+            res.json({ok: true});
+            return;
+        }
+
+        await db.run(`
+            UPDATE tickets
+            SET assigned_admin_id = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+            `, [assignedAdminId, ticketId]);
+
+        const beforeJson = JSON.stringify(ticketRow.assigned_admin_id);
+        const afterJson = JSON.stringify(assignedAdminId);
+        await db.run(`
+            INSERT INTO audit_events (actor_user_id, action, entity_type, entity_id, before, after)
+            VALUES (?, ?, ?, ?, ?, ?)
+            `, [userId, 'ticket_assigned', 'ticket', ticketId, beforeJson, afterJson]);
+
+        if (assignedAdminId !== null && assignedAdminId !== userId){
+            if (!userId){
+                res.status(401).json({error: 'Invalid user!'});
+                return;
+            }
+            await enqueueJob('ticket_assigned', {
+                ticketId,
+                assignedAdminId,
+                assignedByAdminId: userId,
+                oldAssignedAdminId: ticketRow.assigned_admin_id,
+            });
+        }
+        
+        res.json({ok: true});
+        return;
+
+    } catch(error){
+        console.error(error);
+        res.status(500).json({error: 'Server failed. Please try again.'});
+        return;
+    }
 }

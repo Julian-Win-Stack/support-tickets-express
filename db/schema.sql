@@ -17,6 +17,9 @@ CREATE TABLE IF NOT EXISTS tickets (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE    
 );
+-- assigned_admin_id added by migration 002_add_assigned_admin_to_tickets.sql
+-- idx_tickets_assigned_admin added by migration 002_add_assigned_admin_to_tickets.sql
+
 
 CREATE TABLE IF NOT EXISTS notes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -54,7 +57,7 @@ CREATE TABLE IF NOT EXISTS jobs (
 
 CREATE INDEX IF NOT EXISTS idx_jobs_status_run_at ON jobs (status, run_at);
 
--- job_id (UNIQUE) is added by migration 001_add_job_id_to_notifications.sql
+
 CREATE TABLE IF NOT EXISTS notifications (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
@@ -65,7 +68,8 @@ CREATE TABLE IF NOT EXISTS notifications (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
-
 CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications (user_id);
 CREATE INDEX IF NOT EXISTS idx_notifications_created_at ON notifications (created_at);
+-- job_id (UNIQUE) added by migration 001_add_job_id_to_notifications.sql
+-- idx_notifications_job_id added by migration 001_add_job_id_to_notifications.sql
 
