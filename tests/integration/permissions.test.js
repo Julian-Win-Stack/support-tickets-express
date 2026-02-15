@@ -115,7 +115,20 @@ describe('permissions', () => {
             expect(payload.oldStatus).toBe('open');
             expect(payload.newStatus).toBe('in_progress');
         });
+        it ('Non admin user cannot assign a ticket to an admin', async () => {
+            const agent = request.agent(app);
+            await loginAsUserA(agent);
+            const res = await agent.patch(`/api/ticket/${ticketId}/assign`).send({ assigned_admin_id: adminId });
+            expect(res.status).toBe(403);
+        });
+        it ('Cannot assign a ticket to a user that is not an admin', async () => {
+            const agent = request.agent(app);
+            await loginAsUserA(agent);
+            const res = await agent.patch(`/api/ticket/${ticketId}/assign`).send({ assigned_admin_id: userAId });
+            expect(res.status).toBe(403);
+        });
     });
+
 
     describe('notes', () => {
         it('user cannot access notes of a ticket', async () => {

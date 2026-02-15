@@ -364,6 +364,10 @@ export async function assignTicket(req: Request, res: Response): Promise<void> {
         }
 
         const userId = req.session.userId;
+        if (!userId){
+            res.status(401).json({error: 'Invalid user!'});
+            return;
+        }
         const rawAssignedAdminId = req.body.assigned_admin_id;
 
         const ticketRow = await db.get(`
@@ -407,20 +411,28 @@ export async function assignTicket(req: Request, res: Response): Promise<void> {
 
         const beforeJson = JSON.stringify(ticketRow.assigned_admin_id);
         const afterJson = JSON.stringify(assignedAdminId);
+        if (assignedAdminId !== null){
         await db.run(`
             INSERT INTO audit_events (actor_user_id, action, entity_type, entity_id, before, after)
             VALUES (?, ?, ?, ?, ?, ?)
             `, [userId, 'ticket_assigned', 'ticket', ticketId, beforeJson, afterJson]);
+        }
 
         if (assignedAdminId !== null && assignedAdminId !== userId){
-            if (!userId){
-                res.status(401).json({error: 'Invalid user!'});
-                return;
-            }
             await enqueueJob('ticket_assigned', {
                 ticketId,
                 assignedAdminId,
                 assignedByAdminId: userId,
+                oldAssignedAdminId: ticketRow.assigned_admin_id,
+            });
+        } else if ( assignedAdminId === null && ticketRow.assigned_admin_id !== null ){
+            await db.run(`
+                INSERT INTO audit_events (actor_user_id, action, entity_type, entity_id, before, after)
+                VALUES (?, ?, ?, ?, ?, ?)
+                `, [userId, 'ticket_unassigned', 'ticket', ticketId, beforeJson, afterJson]);
+            await enqueueJob('ticket_unassigned', {
+                ticketId,
+                unassignedByAdminId: userId,
                 oldAssignedAdminId: ticketRow.assigned_admin_id,
             });
         }

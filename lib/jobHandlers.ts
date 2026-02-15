@@ -1,6 +1,6 @@
 import { getDB } from '../db/db.js';
 import { sendNotification } from './notificationsDb.js';
-import type {  AdminStatusChangePayload, TicketAssignedPayload } from '../db/types.js';
+import type {  AdminStatusChangePayload, TicketAssignedPayload, TicketUnassignedPayload } from '../db/types.js';
 
 const HANDLERS = {
     ticket_status_changed: async (payload: AdminStatusChangePayload, jobId: number): Promise<void> => {
@@ -23,6 +23,19 @@ const HANDLERS = {
         await sendNotification(assignedAdminId, 'email', subject, message, 'sent', jobId);
         return
     },
+    ticket_unassigned: async (payload: TicketUnassignedPayload, jobId: number): Promise<void> => {
+        const { ticketId, unassignedByAdminId, oldAssignedAdminId } = payload;
+        const db = getDB();
+        const unassignerRow = await db.get<{ name: string }>(
+            'SELECT name FROM users WHERE id = ?',
+            [unassignedByAdminId]
+        );
+        const unassignerName = unassignerRow?.name ?? 'An admin';
+        const subject = 'Ticket unassigned from you';
+        const message = `Admin ${unassignerName} unassigned ticket #${ticketId} from you`;
+        await sendNotification(oldAssignedAdminId, 'email', subject, message, 'sent', jobId);
+        return
+    },
 
 };
 
@@ -33,6 +46,7 @@ const HANDLERS = {
 export function getHandler(type: string)
 : ((payload: AdminStatusChangePayload, jobId: number) => Promise<void>) 
 | ((payload: TicketAssignedPayload, jobId: number) => Promise<void>)
+| ((payload: TicketUnassignedPayload, jobId: number) => Promise<void>)
 | undefined {
     return HANDLERS[type as keyof typeof HANDLERS];
 }
