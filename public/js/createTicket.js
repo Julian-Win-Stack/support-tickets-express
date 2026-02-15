@@ -1,4 +1,5 @@
 import { getTickets, renderTickets } from './ticket&notes.js';
+import { getRole } from './getRole.js';
 
 const createTicketForm = document.getElementById('create-ticket-form');
 const titleArea = document.getElementById('create-ticket-title-area');
@@ -25,7 +26,8 @@ createTicketForm.addEventListener('submit',async(e)=>{
 
         if (res.ok){
             const data = await getTickets();
-            renderTickets(data);
+            const roleData = await getRole();
+            renderTickets(data, roleData.role);
             ticketStatusArea.textContent = 'Ticket created'
             
         } else{

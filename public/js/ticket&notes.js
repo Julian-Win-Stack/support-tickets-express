@@ -270,15 +270,23 @@ assignAdminDropdownMenu.addEventListener('click', async (e) => {
 async function eventHandler(){
     const statusValue = selectStatus.value;
     const searchValue = searchBar.value;
-    const data = await getTickets(statusValue, searchValue, adminViewCondition)
-    renderTickets(data)
+    const data = await getTickets(statusValue, searchValue, adminViewCondition);
+    const roleData = await getRole();
+    renderTickets(data, roleData.role);
 }
 
-export function renderTickets(data) {
+export function renderTickets(data, role = 'user') {
     let finalString = '';
 
     if (data){
         data.data.forEach(ticket => {
+            const assignedLabel = role === 'admin'
+                ? (ticket.assigned_admin_name ? `Assigned to: ${ticket.assigned_admin_name}` : 'Not assigned')
+                : '';
+            const assignedMeta = assignedLabel
+                ? `<div class="ticket-meta">${assignedLabel}</div>`
+                : '';
+
             finalString += `          
             <article class="ticket">
               <div class="ticket-top">
@@ -289,6 +297,7 @@ export function renderTickets(data) {
                 <span class="badge">${ticket.status}</span>
               </div>
               <div class="ticket-meta">Owner: ${ticket.name} (${ticket.email})</div>
+              ${assignedMeta}
               <div class="ticket-meta">Created: ${ticket.created_at}</div>
               <div class="ticket-actions">
                 <button class="btn btn-ghost select-ticket-btns" type="button" data-ticket-id="${ticket.id}">Open</button>

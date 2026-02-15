@@ -102,10 +102,16 @@ export async function getTickets(req: Request, res: Response): Promise<void> {
             return;
         }
 
-        const baseSqliteCode = 
-                [`SELECT T.*, U.email, U.name
-                FROM tickets T
-                JOIN users U ON T.user_id = U.id`];
+        const selectClause = roleRow.role === 'admin'
+            ? `SELECT T.*, U.email, U.name, A.name AS assigned_admin_name
+               FROM tickets T
+               JOIN users U ON T.user_id = U.id
+               LEFT JOIN users A ON T.assigned_admin_id = A.id`
+            : `SELECT T.*, U.email, U.name
+               FROM tickets T
+               JOIN users U ON T.user_id = U.id`;
+
+        const baseSqliteCode = [selectClause];
 
         const { whereParts:plainWhereParts, userInput:plainUserInput } = buildTicketConstraints(roleRow.role, userId, '', '', '');
 

@@ -1,6 +1,5 @@
 import { getTickets, renderTickets } from './ticket&notes.js';
-
-
+import { getRole } from './getRole.js';
 
 // DOM
 const loginName = document.getElementById('login-name');
@@ -8,13 +7,16 @@ const logoutBtn = document.getElementById('logout-btn');
 const loginStatus = document.getElementById('login-status');
 const topLoginStatus = document.getElementById('top-login-status');
 
-
-
 // init
 document.getElementById('ticket-detail-area').style.display = 'none';
 init();
 const data = await getTickets();
-renderTickets(data);
+let role = 'user';
+try {
+    const roleData = await getRole();
+    role = roleData.role;
+} catch {}
+renderTickets(data, role);
 
 
 
