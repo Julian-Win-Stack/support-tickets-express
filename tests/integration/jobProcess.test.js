@@ -6,6 +6,7 @@ import { loginAsAdmin } from '../helpers/authHelpers.js';
 import { seed } from '../helpers/seed.js';
 import { tick } from '../../lib/worker.js';
 import { getHandler } from '../../lib/jobHandlers.js';
+import { runEscalationSweep } from '../../lib/scheduler.js';
 
 describe('jobProcess', () => {
     /** @type {number} */
@@ -23,6 +24,9 @@ describe('jobProcess', () => {
     /** @type {number} */
     let adminBId;
 
+    /** @type {number} */
+    let ticketEscalateId;
+
     beforeAll(async () => {
         const ids = await seed();
         adminId = ids.adminId;
@@ -30,6 +34,7 @@ describe('jobProcess', () => {
         ticketBId = ids.ticketBId;
         ticketAdminId = ids.ticketAdminId;
         adminBId = ids.adminBId;
+        ticketEscalateId = ids.ticketEscalateId;
     });
 
     describe('admin status change', () => {
@@ -82,6 +87,9 @@ describe('jobProcess', () => {
             expect(notificationRow.length).toBe(1);
             expect(notificationRow[0].status).toBe('sent');
         });
+    });
+
+        describe('ticket assignment', () => {
         it ('ticketassignment pipeline: assign writes audit + enqueues job, tick sends notification and marks job succeeded', async () => {
             const agent = request.agent(app);
             await loginAsAdmin(agent);
@@ -146,5 +154,62 @@ describe('jobProcess', () => {
             expect(notificationRow.status).toBe('sent');
         });
     });
+    describe('ticket escalation', () => {
+        it(`ticket escalation pipeline: escalate writes audit 
+            + enqueues job, tick sends notification and marks job succeeded 
+            + Idempotency: processing the same job twice does not create duplicate notifications`, async () => {
+            await runEscalationSweep();
+            await tick();
+            const db = getDB();
+            const ticketRow = await db.get(`
+                SELECT * FROM tickets
+                WHERE id = ?
+                `, [ticketEscalateId]);
+            console.log('ticketRow', ticketRow);
+            expect(ticketRow).toBeDefined();
+            expect(ticketRow.escalated_at).toBeDefined();
 
+            const auditRow = await db.get(`
+                SELECT * FROM audit_events
+                WHERE entity_type = 'ticket' AND entity_id = ? AND action = 'escalated_ticket' AND actor_user_id = ?
+                `, [ticketEscalateId, 9999]);
+            expect(auditRow).toBeDefined();
+
+            const jobRow = await db.get(`
+                SELECT * FROM jobs
+                WHERE type = ? AND payload_json = ? AND status = ?
+                `, ['ticket_escalated', JSON.stringify({ ticketId: ticketEscalateId, reason: 'open_over_24h' }), 'succeeded']);
+            expect(jobRow).toBeDefined();
+            const notificationRows = await db.all(`
+                SELECT * FROM notifications
+                `);
+            console.log('notificationRows', notificationRows);
+
+            const adminBNotificationRow = await db.get(`
+                SELECT * FROM notifications
+                WHERE user_id = ? AND subject = ? AND channel = ? AND status = ?
+                `, [adminBId, 'Ticket escalated', 'email', 'sent']);
+            expect(adminBNotificationRow).toBeDefined();
+
+            const adminANotificationRow = await db.all(`
+                SELECT * FROM notifications
+                WHERE user_id = ? AND subject = ? AND channel = ? AND status = ?
+                `, [adminId, 'Ticket escalated', 'email', 'sent']);
+            expect(adminANotificationRow).length(1);
+
+            const handler = getHandler('ticket_escalated');
+            await handler({ ticketId: ticketEscalateId, reason: 'open_over_24h' }, jobRow.id);
+            const adminBNotificationArray = await db.all(`
+                SELECT * FROM notifications
+                WHERE user_id = ? AND subject = ? AND channel = ? AND status = ?
+                `, [adminBId, 'Ticket escalated', 'email', 'sent']);
+            expect(adminBNotificationArray).length(1);
+
+            const adminANotificationArray = await db.all(`
+                SELECT * FROM notifications
+                WHERE user_id = ? AND subject = ? AND channel = ? AND status = ?
+                `, [adminId, 'Ticket escalated', 'email', 'sent']);
+            expect(adminANotificationArray).length(1);
+        });
+    });
 });

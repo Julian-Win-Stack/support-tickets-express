@@ -5,6 +5,7 @@ import { SEED_PASSWORD, USERA_EMAIL, USERB_EMAIL, ADMIN_EMAIL, ADMINB_EMAIL } fr
 
 export async function seed() {
     const db = getDB();
+    await db.run(`DELETE FROM tickets`);
     const hashedPassword = await bcrypt.hash(SEED_PASSWORD, 10);
 
     await db.run(`
@@ -34,6 +35,11 @@ export async function seed() {
     );
 
     await db.run(`
+        INSERT INTO tickets (user_id, title, body, status, created_at) VALUES (?, ?, ?, ?, datetime('now', '-25 hours'))`,
+        [userAId.id, 'Ticket escalate', 'Ticket escalate body', 'open'],
+    );
+
+    await db.run(`
         INSERT INTO tickets (user_id, title, body, status) VALUES (?, ?, ?, ?)`,
         [userBId.id, 'Ticket 2B', 'Ticket 2B body', 'open'],
     );
@@ -45,13 +51,20 @@ export async function seed() {
     const ticketId = await db.get(`SELECT id FROM tickets WHERE user_id = ?`, [userAId.id]);
     const ticketBId = await db.get(`SELECT id FROM tickets WHERE user_id = ?`, [userBId.id]);
     const ticketAdminId = await db.get(`SELECT id FROM tickets WHERE user_id = ?`, [adminId.id]);
-
+    const ticketEscalateId = await db.get(`SELECT id FROM tickets WHERE title = ?`, ['Ticket escalate']);
     await db.run(`
         INSERT INTO notes (ticket_id, admin_id, body) VALUES (?, ?, ?)`,
         [ticketId.id, adminId.id, 'Note 1'],
     );
 
-    return { ticketId: ticketId.id, adminId: adminId.id, adminBId: adminBId.id, userAId: userAId.id, userBId: userBId.id, ticketBId: ticketBId.id, ticketAdminId: ticketAdminId.id };
+    return { ticketId: ticketId.id,
+         adminId: adminId.id, 
+         adminBId: adminBId.id, 
+         userAId: userAId.id, 
+         userBId: userBId.id, 
+         ticketBId: ticketBId.id, 
+         ticketAdminId: ticketAdminId.id,
+         ticketEscalateId: ticketEscalateId.id };
 }
 
 

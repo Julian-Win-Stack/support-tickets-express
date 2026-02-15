@@ -78,4 +78,9 @@ export type TicketUnassignedPayload ={
     unassignedByAdminId: number;
     oldAssignedAdminId: number;
 }
-export type PayloadUnion = AdminStatusChangePayload | TicketAssignedPayload | TicketUnassignedPayload;
+
+export type TicketEscalatedPayload ={
+    ticketId: number;
+    reason: string;
+}
+export type PayloadUnion = AdminStatusChangePayload | TicketAssignedPayload | TicketUnassignedPayload | TicketEscalatedPayload;

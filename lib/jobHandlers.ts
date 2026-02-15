@@ -1,6 +1,6 @@
 import { getDB } from '../db/db.js';
 import { sendNotification } from './notificationsDb.js';
-import type {  AdminStatusChangePayload, TicketAssignedPayload, TicketUnassignedPayload } from '../db/types.js';
+import type {  AdminStatusChangePayload, TicketAssignedPayload, TicketUnassignedPayload, TicketEscalatedPayload } from '../db/types.js';
 
 const HANDLERS = {
     ticket_status_changed: async (payload: AdminStatusChangePayload, jobId: number): Promise<void> => {
@@ -36,7 +36,22 @@ const HANDLERS = {
         await sendNotification(oldAssignedAdminId, 'email', subject, message, 'sent', jobId);
         return
     },
-
+    ticket_escalated: async (payload: TicketEscalatedPayload, jobId: number): Promise<void> => {
+        const { ticketId, reason } = payload;
+        const subject = 'Ticket escalated';
+        const message = `Ticket #${ticketId} has been escalated due to ${reason}`;
+        const db = getDB();
+        const assignedAdminId = await db.get(`SELECT assigned_admin_id FROM tickets WHERE id = ?`, [ticketId]);
+        if (assignedAdminId.assigned_admin_id){ 
+            await sendNotification(assignedAdminId.assigned_admin_id, 'email', subject, message, 'sent', jobId);
+        } else {
+            const allAdmins = await db.all(`SELECT id FROM users WHERE role = 'admin'`);
+            for (const admin of allAdmins){
+                await sendNotification(admin.id, 'email', subject, message, 'sent', jobId);
+            }
+        }
+        return
+    }
 };
 
 
@@ -47,6 +62,7 @@ export function getHandler(type: string)
 : ((payload: AdminStatusChangePayload, jobId: number) => Promise<void>) 
 | ((payload: TicketAssignedPayload, jobId: number) => Promise<void>)
 | ((payload: TicketUnassignedPayload, jobId: number) => Promise<void>)
+| ((payload: TicketEscalatedPayload, jobId: number) => Promise<void>)
 | undefined {
     return HANDLERS[type as keyof typeof HANDLERS];
 }

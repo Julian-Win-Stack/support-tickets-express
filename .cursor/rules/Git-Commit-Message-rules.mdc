@@ -1,0 +1,166 @@
+---
+description: 
+alwaysApply: true
+---
+
+When I ask you to write git commit messages, use this format - 
+
+The Core Rules (Industry Standard)
+
+1. Use the Imperative Mood
+
+Write:
+
+Add audit log for ticket status changes
+Fix race condition in job worker
+Refactor DB connection to reuse single instance
+
+Not:
+
+Added audit log
+Adding audit log
+Fixes race condition
+
+Why?
+
+Because Git internally reads it as:
+
+“If applied, this commit will…”
+
+So:
+	•	“Add feature”
+	•	“Fix bug”
+	•	“Remove unused route”
+
+Clean. Direct. No fluff.
+
+⸻
+
+2. Keep the First Line Short (≤ 50 characters ideally)
+
+Short summary line.
+
+Example:
+
+Add background job system for notifications
+
+If you need more explanation, add a body below.
+
+⸻
+
+3. Add a Blank Line Before Body (If Needed)
+
+Structure:
+
+Add background job system for notifications
+
+Implements a jobs table with status and dedupe_key.
+Creates worker process to process pending jobs.
+Enqueues job when ticket status changes.
+
+This is professional.
+
+Not required for tiny commits, but mandatory for complex ones.
+
+⸻
+
+4. One Commit = One Logical Change
+
+This is where beginners mess up.
+
+Bad:
+
+Add login, fix ticket bug, change CSS, update README
+
+That’s chaos.
+
+Good:
+
+Add session regeneration on login
+
+Separate:
+
+Fix incorrect status filtering for admin
+
+Why this matters:
+	•	Makes debugging easier
+	•	Makes reverts safer
+	•	Makes you look disciplined
+
+Startups love this because production incidents happen.
+
+⸻
+
+5. Be Specific
+
+Bad:
+
+Improve backend
+
+Improve what?
+
+Good:
+
+Optimize DB connection to reuse single SQLite instance
+
+Or:
+
+Make job processing idempotent using dedupe_key
+
+Specific commits show technical clarity.
+
+⸻
+
+Advanced: The Format Real Teams Use
+
+Many startups use Conventional Commits.
+
+Format:
+
+type: short summary
+
+Examples:
+
+feat: add audit logging for ticket updates
+fix: prevent duplicate job enqueueing
+refactor: extract ticket constraint builder
+test: add worker process integration tests
+docs: update README with architecture overview
+
+Common types:
+	•	feat
+	•	fix
+	•	refactor
+	•	test
+	•	docs
+	•	chore
+
+Do you HAVE to use this?
+
+No.
+
+But using it signals maturity.
+
+
+Practical Template For You
+
+Here’s what I’d personally use if I were 19 and trying to look dangerous on GitHub:
+
+Small Change
+
+fix: prevent users from editing closed tickets
+
+Medium Change
+
+feat: enqueue notification job on ticket status change
+
+Adds job row with type 'ticket_status_changed'.
+Worker processes job and updates notification table.
+
+Large Change
+
+refactor: migrate backend to TypeScript strict mode
+
+Converts controllers, middleware, and utils to TS.
+Adds explicit return types and DB row interfaces.
+I
