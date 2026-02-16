@@ -86,7 +86,7 @@ export async function loginUser(req: Request, res: Response): Promise<void> {
             `, [cleanEmail]);
 
         if (!dbRow){
-            res.status(400).json({error: 'Incorrect email'});
+            res.status(400).json({error: 'Incorrect email or password'});
             return;
         }
 
@@ -95,7 +95,7 @@ export async function loginUser(req: Request, res: Response): Promise<void> {
         const isPasswordMatch = await bcrypt.compare(loginPassword, dbPasswordHash);
 
         if (!isPasswordMatch){
-            res.status(400).json({error: 'Incorrect password'});
+            res.status(400).json({error: 'Incorrect email or password'});
             return;
         }
 

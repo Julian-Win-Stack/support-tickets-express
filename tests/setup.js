@@ -2,6 +2,8 @@ import 'dotenv/config';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import fs from 'node:fs';       // for deleting the test database
+import { beforeEach } from 'vitest';
+import { resetRateLimitStore } from '../middleware/rateLimit.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,4 +18,6 @@ if (fs.existsSync(testDbPath)) {
     }
 }
 
-
+beforeEach(() => {
+    resetRateLimitStore();
+});
