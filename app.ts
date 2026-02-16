@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import path from "path";
 import session from "express-session";
 import "dotenv/config";
@@ -24,6 +25,13 @@ const app = express();
 app.set('trust proxy', 1);
 
 app.use(express.json());
+
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
 
 const sessionSecret = process.env.SESSION_SECRET;
 if (!sessionSecret){
