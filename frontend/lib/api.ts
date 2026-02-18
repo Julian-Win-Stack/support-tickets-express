@@ -47,3 +47,15 @@ export async function register(
   if (!res.ok) throw new Error(data.error || "Registration failed");
   return data;
 }
+
+export async function createTicket(title: string, body: string) {
+  const res = await fetch(`${API_URL}/api/ticket`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title, body }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Ticket creation failed");
+  return data;
+}

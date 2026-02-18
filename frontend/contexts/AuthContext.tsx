@@ -18,6 +18,8 @@ type AuthContextValue = {
     login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
     register: (name: string, email: string, password: string) => Promise<void>;
+    error: string | null;
+    successMessage: string | null;
   };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -25,19 +27,21 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
     useEffect(() => {
         me()
         .then((data) => {
             if (data.ok && data.name && data.role) {
+                setError(null);
                 setUser({ name: data.name, role: data.role });
-            } else {
-                setUser(null);
-            }
+            } 
             setLoading(false);
         })
         .catch((error) => {
             console.error(error);
+            setError(error instanceof Error ? error.message : 'Failed to load user data');
             setUser(null);
         })
         .finally(() => {
@@ -46,17 +50,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const login = useCallback(async (email: string, password: string) => {
-        const data = await apiLogin(email, password);
-        setUser({ name: data.name, role: data.role });
+        setError(null);
+        try {
+            const data = await apiLogin(email, password);
+            if (data.name && data.role) {
+                setError(null);
+                setUser({ name: data.name, role: data.role });
+                setSuccessMessage('Login successful');
+            } else {
+                setError(data.error || 'Failed to login');
+            }
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to login');
+        }
     }, []);
 
     const logout = useCallback(async () => {
-        await apiLogout();
-        setUser(null);
+        try {
+            await apiLogout();
+            setError(null);
+            setUser(null);
+            setSuccessMessage('Logout successful');
+        } catch (error) {
+            setError(error instanceof Error ? error.message : 'Failed to logout');
+        }
     }, []);
 
     const register = useCallback(async (name: string, email: string, password: string) => {
-        const data = await apiRegister(name, email, password);
+        setError(null);
+        try {
+            await apiRegister(name, email, password);
+            setSuccessMessage('Registration successful');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Failed to register");
+        }
     }, []);
 
     const value: AuthContextValue = {
@@ -65,6 +92,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         logout,
         register,
+        error,
+        successMessage,
     };
 
     return (
