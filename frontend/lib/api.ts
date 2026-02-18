@@ -59,3 +59,23 @@ export async function createTicket(title: string, body: string) {
   if (!res.ok) throw new Error(data.error || "Ticket creation failed");
   return data;
 }
+
+export async function getTickets(status?: string, search?: string, admin_view_condition?: string) {
+
+  const queryParams = [];
+  if (status) {
+    queryParams.push(`status=${status}`);
+  }
+  if (search) {
+    queryParams.push(`search=${search}`);
+  }
+
+  if (admin_view_condition) {
+    queryParams.push(`admin_view_condition=${admin_view_condition}`);
+  }
+  const finalQueryString = queryParams.length > 1 ? `?${queryParams.join('&')}` : queryParams.length === 1 ? `?${queryParams[0]}` : '';
+  const res = await fetch(`${API_URL}/api/ticket${finalQueryString}`, { credentials: "include" });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to get tickets");
+  return data;
+}

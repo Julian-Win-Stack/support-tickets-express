@@ -8,7 +8,7 @@ const labelClass = "text-xs text-[#aab6d6]";
 const btnClass =
   "py-2.5 px-3 rounded-[10px] border border-[#2a3b62] bg-[#1c2a47] text-[#e8eefc] cursor-pointer hover:brightness-110 transition-[filter]";
 
-export function CreateTicketSection() {
+export function CreateTicketSection({ updateTickets }: { updateTickets: () => void }) {
   const [title, setTitle] = useState<string | null>(null);
   const [body, setBody] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -24,6 +24,7 @@ export function CreateTicketSection() {
         setTitle('');
         setBody('');
         setSuccessMessage('Ticket created successfully');
+        updateTickets();
       } else {
         setError(data.error || 'Failed to create ticket');
       }
