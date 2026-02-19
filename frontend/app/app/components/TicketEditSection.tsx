@@ -16,9 +16,13 @@ const btnClassSm =
 const btnClassSelectedSm =
   "text-sm py-1.5 px-2.5 rounded-[8px] border border-[#0e7490] bg-[#0e7490]/30 text-[#e8eefc] cursor-pointer transition-[filter]";
 
-export function TicketEditSection({ selectedTicket }: { selectedTicket: Ticket | null }) {
+export function TicketEditSection({ selectedTicket, updateTicket, refreshTickets, refreshTicketsAfterEdit }
+  : { selectedTicket: Ticket | null,
+     updateTicket: (ticketId: number, title: string, body: string, status: string) => void,
+     refreshTickets: () => void,
+     refreshTicketsAfterEdit: () => void }) {
   const { user } = useAuth();
-  const [selectedAssignee, setSelectedAssignee] = useState<string>("");
+  const [selectedAdminId, setSelectedAdminId] = useState<number | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<
     "open" | "in_progress" | "resolved"
   >("open");
@@ -37,7 +41,7 @@ export function TicketEditSection({ selectedTicket }: { selectedTicket: Ticket |
 
   useEffect(() => {
     if (selectedTicket) {
-      setSelectedAssignee(selectedTicket.assigned_admin_id ? String(selectedTicket.assigned_admin_id) : "");
+      setSelectedAdminId(selectedTicket.assigned_admin_id ? selectedTicket.assigned_admin_id : null);
       setSelectedStatus(selectedTicket.status);
       setTitle(selectedTicket.title);
       setBody(selectedTicket.body);
@@ -68,11 +72,11 @@ export function TicketEditSection({ selectedTicket }: { selectedTicket: Ticket |
             <>
               <select
                 id="assign-ticket"
-                value={selectedAssignee}
-                onChange={(e) => setSelectedAssignee(e.target.value)}
-                className="text-sm py-1.5 px-2.5 rounded-[8px] border border-[#263557] bg-[#0f1524] text-[#e8eefc] outline-none min-w-[160px]"
+                value={selectedAdminId ? selectedAdminId : ""}
+                onChange={(e) => setSelectedAdminId(Number(e.target.value))}
+                className="text-sm py-1.5 px-2.5 rounded-[8px] border border-[#263557] bg-[#0f1524] text-[#e8eefc] outline-none min-w-[120px]"
               >
-                <option value="">Assign to...</option>
+                <option value="">Unassigned</option>
                 {admins.length > 0 && admins.map((admin) => (
                   <option key={admin.id} value={admin.id}>
                     {admin.name}
@@ -154,7 +158,16 @@ export function TicketEditSection({ selectedTicket }: { selectedTicket: Ticket |
             disabled={user?.role === 'admin'}
           />
         </div>
-        <button type="button" className={`${btnClass} w-full`}>
+        <button
+         type="button"
+          className={`${btnClass} w-full`}
+          onClick={async () => {
+            user?.role === 'admin' 
+            ? await updateTicket(selectedTicket.id, "", "", selectedStatus) 
+            : await updateTicket(selectedTicket.id, title, body, "");
+            refreshTicketsAfterEdit();
+          }}
+          >
           Save edits
         </button>
       </div>

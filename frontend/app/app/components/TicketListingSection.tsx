@@ -1,5 +1,4 @@
 "use client";
-import { useEffect, useState } from "react";
 import { StatusBadge } from "./StatusBadge";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Ticket } from "@/types";
@@ -11,21 +10,28 @@ const btnClass =
   "py-2.5 px-3 rounded-[10px] border border-[#2a3b62] bg-[#1c2a47] text-[#e8eefc] cursor-pointer hover:brightness-110 transition-[filter]";
 
 
-export function TicketListingSection({ tickets, ticketsShown, updateTickets, setSelectedTicketId }
-  : { tickets: Ticket[], 
-    ticketsShown: number, 
-    updateTickets: (status?: string, search?: string, admin_view_condition?: string) => void, 
-    setSelectedTicketId: (ticketId: number) => void }) {
-  
-  const [status, setStatus] = useState<string | null>(null);
-  const [search, setSearch] = useState<string | null>(null);
-  const [assignment, setAssignment] = useState<string | null>(null);
-  
+export function TicketListingSection({
+  tickets,
+  ticketsShown,
+  setSelectedTicketId,
+  status,
+  setStatus,
+  search,
+  setSearch,
+  assignment,
+  setAssignment,
+}: {
+  tickets: Ticket[];
+  ticketsShown: number;
+  setSelectedTicketId: (ticketId: number) => void;
+  status: string | null;
+  setStatus: (v: string | null) => void;
+  search: string | null;
+  setSearch: (v: string | null) => void;
+  assignment: string | null;
+  setAssignment: (v: string | null) => void;
+}) {
   const { user } = useAuth();
-
-  useEffect(() => {
-    updateTickets(status ?? '', search ?? '', assignment ?? '');
-  }, [status, search, assignment]);
 
   return (
     <div className="bg-[#121a2a] border border-[#1e2a44] rounded-[12px] p-4">
@@ -87,12 +93,14 @@ export function TicketListingSection({ tickets, ticketsShown, updateTickets, set
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <button type="button" className={btnClass} onClick={() => {
-          updateTickets();
-          setStatus(null);
-          setSearch(null);
-          setAssignment(null);
-        }}
+        <button
+          type="button"
+          className={btnClass}
+          onClick={() => {
+            setStatus(null);
+            setSearch(null);
+            setAssignment(null);
+          }}
           >
           Refresh
         </button>

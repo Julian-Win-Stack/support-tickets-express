@@ -105,3 +105,15 @@ export async function assignTicket(ticketId: number, assignedAdminId: number) {
   if (!res.ok) throw new Error(data.error || "Failed to assign ticket");
   return data;
 }
+
+export async function updateTicket(ticketId: number, title: string = "", body: string = "", status: string = "") {
+  const res = await fetch(`${API_URL}/api/ticket/${ticketId}`, {
+    method: "PATCH",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title, body, status }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to update ticket");
+  return data;
+}
