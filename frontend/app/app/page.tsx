@@ -4,31 +4,18 @@ import { TicketListingSection } from "./components/TicketListingSection";
 import { TicketEditSection } from "./components/TicketEditSection";
 import { NoteCreationSection } from "./components/NoteCreationSection";
 import { useAuth } from "@/contexts/AuthContext";
-import { redirect } from "next/navigation";
 import { useState, useEffect } from "react";
-import { getTickets } from "@/lib/api";
+import { getTickets, getTicketById } from "@/lib/api";
 import { useRouter } from "next/navigation";
-
-export type Ticket = {
-  id: number;
-  user_id: number;
-  title: string;
-  body: string;
-  status: "open" | "in_progress" | "resolved";
-  name: string;
-  email: string;
-  created_at: string;
-  updated_at: string;
-  assigned_admin_id: number | null;
-  escalated_at: string | null;
-  assigned_admin_name?: string | null;
-}
+import type { Ticket } from "@/types";
 
 export default function HomePage() {
   const { user } = useAuth();
   const router = useRouter();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [ticketsShown, setTicketsShown] = useState<number>(0);
+  const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
 
   async function updateTickets(status?: string, search?: string, admin_view_condition?: string) {
     try {
@@ -53,12 +40,25 @@ export default function HomePage() {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (selectedTicketId) {
+      getTicketById(selectedTicketId).then((data) => {
+        setSelectedTicket(data.data);
+      });
+    }
+  }, [selectedTicketId]);
+
   return (
     <main className="max-w-[1200px] mx-auto px-4 py-4">
       <div className="w-full max-w-[920px] mx-auto flex flex-col gap-6">
         <CreateTicketSection updateTickets={updateTickets} />
-        <TicketListingSection tickets={tickets} ticketsShown={ticketsShown} updateTickets={updateTickets} />
-        <TicketEditSection />
+        <TicketListingSection 
+          tickets={tickets} 
+          ticketsShown={ticketsShown} 
+          updateTickets={updateTickets} 
+          setSelectedTicketId={setSelectedTicketId} 
+        />
+        <TicketEditSection selectedTicket={selectedTicket} />
         <NoteCreationSection />
       </div>
     </main>

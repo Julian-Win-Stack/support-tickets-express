@@ -1,7 +1,10 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { StatusBadge } from "./StatusBadge";
+import { useAuth } from "@/contexts/AuthContext";
+import { getAdmins } from "@/lib/api";
+import type { AdminUser, Ticket } from "@/types";
 
 const inputClass =
   "w-full py-2.5 px-3 rounded-[10px] border border-[#263557] bg-[#0f1524] text-[#e8eefc] outline-none placeholder:text-[#98a7cf]";
@@ -13,30 +16,36 @@ const btnClassSm =
 const btnClassSelectedSm =
   "text-sm py-1.5 px-2.5 rounded-[8px] border border-[#0e7490] bg-[#0e7490]/30 text-[#e8eefc] cursor-pointer transition-[filter]";
 
-const MOCK_ASSIGNEES = ["admin", "admin2", "Unassigned"];
-
-export function TicketEditSection() {
-  const [assignDropdownOpen, setAssignDropdownOpen] = useState(false);
-  const [selectedAssignee, setSelectedAssignee] = useState<string | null>(null);
+export function TicketEditSection({ selectedTicket }: { selectedTicket: Ticket | null }) {
+  const { user } = useAuth();
+  const [selectedAssignee, setSelectedAssignee] = useState<string>("");
   const [selectedStatus, setSelectedStatus] = useState<
     "open" | "in_progress" | "resolved"
   >("open");
-  const assignDropdownRef = useRef<HTMLDivElement>(null);
+  const [title, setTitle] = useState<string>("");
+  const [body, setBody] = useState<string>("");
+  const [admins, setAdmins] = useState<AdminUser[]>([]);
 
   useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (
-        assignDropdownRef.current &&
-        !assignDropdownRef.current.contains(e.target as Node)
-      ) {
-        setAssignDropdownOpen(false);
-      }
+    setAdmins([]);
+    if (user?.role === 'admin') {
+      getAdmins().then((data) => {
+        setAdmins(data.data);
+      });
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [user]);
+
+  useEffect(() => {
+    if (selectedTicket) {
+      setSelectedAssignee(selectedTicket.assigned_admin_id ? String(selectedTicket.assigned_admin_id) : "");
+      setSelectedStatus(selectedTicket.status);
+      setTitle(selectedTicket.title);
+      setBody(selectedTicket.body);
+    }
+  }, [selectedTicket]);
 
   return (
+    selectedTicket && (
     <div className="bg-[#121a2a] border border-[#1e2a44] rounded-[12px] p-4 max-w-[920px]">
       <h2 className="m-0 text-xl font-semibold text-[#e8eefc] mb-3">
         Ticket Detail
@@ -46,91 +55,75 @@ export function TicketEditSection() {
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-mono text-lg font-bold text-[#e8eefc]">
-              Ticket #50
+              Ticket #{selectedTicket.id}
             </span>
-            <StatusBadge status="open" label="open" />
+            <StatusBadge status={selectedTicket.status} label={selectedTicket.status} />
           </div>
           <p className="m-0 mt-1 text-sm text-[#98a7cf]">
-            Updated: 2026-02-16 16:36:19
+            Updated: {selectedTicket.updated_at}
           </p>
         </div>
-        <div
-          className="flex flex-wrap items-center gap-2"
-          ref={assignDropdownRef}
-        >
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setAssignDropdownOpen((o) => !o)}
-              className={`${btnClassSm} flex items-center gap-1`}
-            >
-              {selectedAssignee ?? "Assign to..."}
-              <span
-                className="inline-block w-0 h-0 border-l-[3px] border-r-[3px] border-t-4 border-l-transparent border-r-transparent border-t-current"
-                aria-hidden
-              />
-            </button>
-            {assignDropdownOpen && (
-              <div className="absolute top-full left-0 mt-1 min-w-[160px] py-1 rounded-[10px] border border-[#243353] bg-[#121a2a] z-10">
-                {MOCK_ASSIGNEES.map((name) => (
-                  <button
-                    key={name}
-                    type="button"
-                    className="w-full text-left py-2 px-3 text-sm text-[#e8eefc] hover:bg-[#1e2a44]"
-                    onClick={() => {
-                      setSelectedAssignee(name);
-                      setAssignDropdownOpen(false);
-                    }}
-                  >
-                    {name}
-                  </button>
+        <div className="flex flex-wrap items-center gap-2">
+          {user?.role === "admin" && (
+            <>
+              <select
+                id="assign-ticket"
+                value={selectedAssignee}
+                onChange={(e) => setSelectedAssignee(e.target.value)}
+                className="text-sm py-1.5 px-2.5 rounded-[8px] border border-[#263557] bg-[#0f1524] text-[#e8eefc] outline-none min-w-[160px]"
+              >
+                <option value="">Assign to...</option>
+                {admins.length > 0 && admins.map((admin) => (
+                  <option key={admin.id} value={admin.id}>
+                    {admin.name}
+                  </option>
                 ))}
+              </select>
+              <div
+                className="flex flex-wrap gap-1.5"
+                role="radiogroup"
+                aria-label="Ticket status"
+              >
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={selectedStatus === "resolved"}
+                  className={
+                    selectedStatus === "resolved"
+                      ? btnClassSelectedSm
+                      : btnClassSm
+                  }
+                  onClick={() => setSelectedStatus("resolved")}
+                >
+                  Mark resolved
+                </button>
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={selectedStatus === "in_progress"}
+                  className={
+                    selectedStatus === "in_progress"
+                      ? btnClassSelectedSm
+                      : btnClassSm
+                  }
+                  onClick={() => setSelectedStatus("in_progress")}
+                >
+                  Set in_progress
+                </button>
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={selectedStatus === "open"}
+                  className={
+                    selectedStatus === "open" ? btnClassSelectedSm : btnClassSm
+                  }
+                  onClick={() => setSelectedStatus("open")}
+                >
+                  Set open
+                </button>
               </div>
-            )}
-          </div>
-          <div
-            className="flex flex-wrap gap-1.5"
-            role="radiogroup"
-            aria-label="Ticket status"
-          >
-            <button
-              type="button"
-              role="radio"
-              aria-checked={selectedStatus === "resolved"}
-              className={
-                selectedStatus === "resolved"
-                  ? btnClassSelectedSm
-                  : btnClassSm
-              }
-              onClick={() => setSelectedStatus("resolved")}
-            >
-              Mark resolved
-            </button>
-            <button
-              type="button"
-              role="radio"
-              aria-checked={selectedStatus === "in_progress"}
-              className={
-                selectedStatus === "in_progress"
-                  ? btnClassSelectedSm
-                  : btnClassSm
-              }
-              onClick={() => setSelectedStatus("in_progress")}
-            >
-              Set in_progress
-            </button>
-            <button
-              type="button"
-              role="radio"
-              aria-checked={selectedStatus === "open"}
-              className={
-                selectedStatus === "open" ? btnClassSelectedSm : btnClassSm
-              }
-              onClick={() => setSelectedStatus("open")}
-            >
-              Set open
-            </button>
-          </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -142,8 +135,10 @@ export function TicketEditSection() {
           <input
             type="text"
             id="detail-title"
-            defaultValue="blah"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
             className={inputClass}
+            disabled={user?.role === 'admin'}
           />
         </div>
         <div className="flex flex-col gap-1.5">
@@ -152,9 +147,11 @@ export function TicketEditSection() {
           </label>
           <textarea
             id="detail-body"
-            defaultValue="blah"
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
             rows={4}
             className={`${inputClass} resize-y min-h-[80px]`}
+            disabled={user?.role === 'admin'}
           />
         </div>
         <button type="button" className={`${btnClass} w-full`}>
@@ -162,5 +159,6 @@ export function TicketEditSection() {
         </button>
       </div>
     </div>
+    )
   );
 }

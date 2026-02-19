@@ -79,3 +79,29 @@ export async function getTickets(status?: string, search?: string, admin_view_co
   if (!res.ok) throw new Error(data.error || "Failed to get tickets");
   return data;
 }
+
+export async function getTicketById(ticketId: number) {
+  const res = await fetch(`${API_URL}/api/ticket/${ticketId}`, { credentials: "include" });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to get ticket");
+  return data;
+}
+
+export async function getAdmins() {
+  const res = await fetch(`${API_URL}/api/admin/users`, { credentials: "include" });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to get admins");
+  return data;
+}
+
+export async function assignTicket(ticketId: number, assignedAdminId: number) {
+  const res = await fetch(`${API_URL}/api/ticket/${ticketId}/assign`, {
+    method: "PATCH",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ assignedAdminId }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to assign ticket");
+  return data;
+}

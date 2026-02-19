@@ -1,8 +1,10 @@
+import type { TicketStatus } from "@/types";
+
 export function StatusBadge({
   status,
   label,
 }: {
-  status: "resolved" | "open" | "in_progress";
+  status: TicketStatus;
   label: string;
 }) {
   const bg =

@@ -10,22 +10,12 @@ import {
 } from 'react';
 
 import { login as apiLogin, logout as apiLogout, register as apiRegister, me } from "@/lib/api";
-type User = { name: string; role: string; };
-
-type AuthContextValue = {
-    user: User | null;
-    loading: boolean;
-    login: (email: string, password: string) => Promise<void>;
-    logout: () => Promise<void>;
-    register: (name: string, email: string, password: string) => Promise<void>;
-    error: string | null;
-    successMessage: string | null;
-  };
+import type { AuthUser, AuthContextValue } from "@/types";
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<AuthUser | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);

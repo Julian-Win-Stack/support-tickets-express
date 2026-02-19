@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { StatusBadge } from "./StatusBadge";
-import { Ticket } from "../page";
 import { useAuth } from "@/contexts/AuthContext";
+import type { Ticket } from "@/types";
 
 const inputClass =
   "w-full py-2.5 px-3 rounded-[10px] border border-[#263557] bg-[#0f1524] text-[#e8eefc] outline-none placeholder:text-[#98a7cf]";
@@ -11,11 +11,16 @@ const btnClass =
   "py-2.5 px-3 rounded-[10px] border border-[#2a3b62] bg-[#1c2a47] text-[#e8eefc] cursor-pointer hover:brightness-110 transition-[filter]";
 
 
-export function TicketListingSection({ tickets, ticketsShown, updateTickets }: { tickets: Ticket[], ticketsShown: number, updateTickets: (status?: string, search?: string, admin_view_condition?: string) => void }) {
+export function TicketListingSection({ tickets, ticketsShown, updateTickets, setSelectedTicketId }
+  : { tickets: Ticket[], 
+    ticketsShown: number, 
+    updateTickets: (status?: string, search?: string, admin_view_condition?: string) => void, 
+    setSelectedTicketId: (ticketId: number) => void }) {
   
   const [status, setStatus] = useState<string | null>(null);
   const [search, setSearch] = useState<string | null>(null);
   const [assignment, setAssignment] = useState<string | null>(null);
+  
   const { user } = useAuth();
 
   useEffect(() => {
@@ -115,7 +120,11 @@ export function TicketListingSection({ tickets, ticketsShown, updateTickets }: {
               Created: {ticket.created_at}
             </div>
             <div className="mt-2.5">
-              <button type="button" className={`${btnClass} text-sm py-2 px-3`}>
+              <button 
+                type="button" 
+                className={`${btnClass} text-sm py-2 px-3`}
+                onClick={() => setSelectedTicketId(ticket.id)}
+              >
                 Open
               </button>
             </div>
