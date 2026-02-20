@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { StatusBadge } from "./StatusBadge";
 import { useAuth } from "@/contexts/AuthContext";
-import { getAdmins } from "@/lib/api";
+import { getAdmins, assignTicket } from "@/lib/api";
 import type { AdminUser, Ticket } from "@/types";
 
 const inputClass =
@@ -41,7 +41,7 @@ export function TicketEditSection({ selectedTicket, updateTicket, refreshTickets
 
   useEffect(() => {
     if (selectedTicket) {
-      setSelectedAdminId(selectedTicket.assigned_admin_id ? selectedTicket.assigned_admin_id : null);
+      setSelectedAdminId(selectedTicket.assigned_admin_id ?? null);
       setSelectedStatus(selectedTicket.status);
       setTitle(selectedTicket.title);
       setBody(selectedTicket.body);
@@ -162,10 +162,17 @@ export function TicketEditSection({ selectedTicket, updateTicket, refreshTickets
          type="button"
           className={`${btnClass} w-full`}
           onClick={async () => {
-            user?.role === 'admin' 
-            ? await updateTicket(selectedTicket.id, "", "", selectedStatus) 
-            : await updateTicket(selectedTicket.id, title, body, "");
-            refreshTicketsAfterEdit();
+            try {
+              if (user?.role === 'admin') {
+                await updateTicket(selectedTicket.id, "", "", selectedStatus);
+                await assignTicket(selectedTicket.id, selectedAdminId);
+              } else {
+                await updateTicket(selectedTicket.id, title, body, "");
+              }
+              await refreshTicketsAfterEdit();
+            } catch (e) {
+              console.error(e);
+            }
           }}
           >
           Save edits

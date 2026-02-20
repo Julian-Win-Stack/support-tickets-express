@@ -124,6 +124,11 @@ export function TicketListingSection({
             <div className="mt-1.5 text-sm text-[#98a7cf]">
               Owner: {ticket.name} ({ticket.email})
             </div>
+            {user?.role === 'admin' && (
+              <div className="mt-0.5 text-sm text-[#98a7cf]">
+                {ticket.assigned_admin_name ? `Assigned to: ${ticket.assigned_admin_name}` : "Not assigned"}
+              </div>
+            )}
             <div className="mt-0.5 text-sm text-[#98a7cf]">
               Created: {ticket.created_at}
             </div>

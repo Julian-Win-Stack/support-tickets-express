@@ -94,15 +94,17 @@ export async function getAdmins() {
   return data;
 }
 
-export async function assignTicket(ticketId: number, assignedAdminId: number) {
+export async function assignTicket(ticketId: number, assignedAdminId: number | null) {
+  const assigned_admin_id = assignedAdminId ?? null;
   const res = await fetch(`${API_URL}/api/ticket/${ticketId}/assign`, {
     method: "PATCH",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ assignedAdminId }),
+    body: JSON.stringify({ assigned_admin_id }),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to assign ticket");
+  console.log('ticket assigned. data', data);
   return data;
 }
 
