@@ -79,7 +79,9 @@ export default function HomePage() {
          refreshTickets={refreshTickets}
          refreshTicketsAfterEdit={refreshTicketsAfterEdit}
          />
-        <NoteCreationSection />
+        <NoteCreationSection 
+        selectedTicket={selectedTicket}
+        />
       </div>
     </main>
   );

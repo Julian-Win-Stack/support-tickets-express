@@ -1,5 +1,11 @@
 export type TicketStatus = "open" | "in_progress" | "resolved";
 
+export type Note = {
+  created_at: string;
+  body: string;
+  name: string;
+};
+
 export type Ticket = {
   id: number;
   user_id: number;

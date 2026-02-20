@@ -119,3 +119,22 @@ export async function updateTicket(ticketId: number, title: string = "", body: s
   if (!res.ok) throw new Error(data.error || "Failed to update ticket");
   return data;
 }
+
+export async function getNotes(ticketId: number) {
+  const res = await fetch(`${API_URL}/api/notes/${ticketId}`, { credentials: "include" });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to get notes");
+  return data;
+}
+
+export async function createNote(ticketId: number, body: string) {
+  const res = await fetch(`${API_URL}/api/notes/${ticketId}`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ body }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to create note");
+  return data;
+}

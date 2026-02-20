@@ -66,10 +66,10 @@ export async function createNotes(req: Request, res: Response): Promise<void> {
 
 export async function getNotes(req: Request, res: Response): Promise<void> {
     
-    const rawNumberedId = req.params.id;
-    const numberedId = typeof rawNumberedId === 'string' ? Number(rawNumberedId.trim()) : Number('');
+    const rawNumberedTicketId = req.params.ticketId;
+    const numberedTicketId = typeof rawNumberedTicketId === 'string' ? Number(rawNumberedTicketId.trim()) : Number('');
 
-    if (!Number.isInteger(numberedId) || numberedId < 1){
+    if (!Number.isInteger(numberedTicketId) || numberedTicketId < 1){
         res.status(400).json({error: 'Invalid TicketId!'});
         return;
     }   
@@ -82,7 +82,7 @@ export async function getNotes(req: Request, res: Response): Promise<void> {
             JOIN users U
             ON N.admin_id = U.id
             WHERE N.ticket_id = ?
-            `, [numberedId]
+            `, [numberedTicketId]
         );
         
         res.json({data: notesArray});
