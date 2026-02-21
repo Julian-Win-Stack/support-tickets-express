@@ -4,14 +4,15 @@ import type { Notifications } from '../db/types.js';
 
 /**
  * Insert one notification (e.g. "mock email" for a user).
+ * ticketId is optional; when provided, links the notification to a ticket for "Open ticket" UI.
  */
-export async function sendNotification(userId: number, channel: string, subject: string, message: string, status: string = 'pending', jobId: number): Promise<void> {
+export async function sendNotification(userId: number, channel: string, subject: string, message: string, status: string = 'pending', jobId: number, ticketId?: number): Promise<void> {
     try{
     const db = getDB();
     await db.run(`
-        INSERT OR IGNORE INTO notifications (user_id, channel, subject, message, status, job_id)
-        VALUES (?, ?, ?, ?, ?, ?)
-        `, [userId, channel, subject, message, status, jobId]);
+        INSERT OR IGNORE INTO notifications (user_id, channel, subject, message, status, job_id, ticket_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        `, [userId, channel, subject, message, status, jobId, ticketId ?? null]);
         return
     }catch (error){
         console.error('Failed to insert notification', error);

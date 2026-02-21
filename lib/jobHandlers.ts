@@ -7,7 +7,7 @@ const HANDLERS = {
         const { userId, ticketId, oldStatus, newStatus } = payload;
         const subject = 'Ticket Status Changed';
         const message = `The status of ticket ${ticketId} has been changed from ${oldStatus} to ${newStatus}`;
-        await sendNotification(userId, 'email', subject, message, 'sent', jobId);
+        await sendNotification(userId, 'email', subject, message, 'sent', jobId, ticketId);
         return
     },
     ticket_assigned: async (payload: TicketAssignedPayload, jobId: number): Promise<void> => {
@@ -20,7 +20,7 @@ const HANDLERS = {
         const assignerName = assignerRow?.name ?? 'An admin';
         const subject = 'Ticket assigned to you';
         const message = `Admin ${assignerName} assigned ticket #${ticketId} to you`;
-        await sendNotification(assignedAdminId, 'email', subject, message, 'sent', jobId);
+        await sendNotification(assignedAdminId, 'email', subject, message, 'sent', jobId, ticketId);
         return
     },
     ticket_unassigned: async (payload: TicketUnassignedPayload, jobId: number): Promise<void> => {
@@ -33,7 +33,7 @@ const HANDLERS = {
         const unassignerName = unassignerRow?.name ?? 'An admin';
         const subject = 'Ticket unassigned from you';
         const message = `Admin ${unassignerName} unassigned ticket #${ticketId} from you`;
-        await sendNotification(oldAssignedAdminId, 'email', subject, message, 'sent', jobId);
+        await sendNotification(oldAssignedAdminId, 'email', subject, message, 'sent', jobId, ticketId);
         return
     },
     ticket_escalated: async (payload: TicketEscalatedPayload, jobId: number): Promise<void> => {
@@ -43,11 +43,11 @@ const HANDLERS = {
         const db = getDB();
         const assignedAdminId = await db.get(`SELECT assigned_admin_id FROM tickets WHERE id = ?`, [ticketId]);
         if (assignedAdminId.assigned_admin_id){ 
-            await sendNotification(assignedAdminId.assigned_admin_id, 'email', subject, message, 'sent', jobId);
+            await sendNotification(assignedAdminId.assigned_admin_id, 'email', subject, message, 'sent', jobId, ticketId);
         } else {
             const allAdmins = await db.all(`SELECT id FROM users WHERE role = 'admin'`);
             for (const admin of allAdmins){
-                await sendNotification(admin.id, 'email', subject, message, 'sent', jobId);
+                await sendNotification(admin.id, 'email', subject, message, 'sent', jobId, ticketId);
             }
         }
         return
