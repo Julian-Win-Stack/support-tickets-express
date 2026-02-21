@@ -17,21 +17,24 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<AuthUser | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [loginError, setLoginError] = useState<string | null>(null);
+    const [registerError, setRegisterError] = useState<string | null>(null);
+    const [loginSuccessMessage, setLoginSuccessMessage] = useState<string | null>(null);
+    const [registerSuccessMessage, setRegisterSuccessMessage] = useState<string | null>(null);
 
     useEffect(() => {
         me()
         .then((data) => {
             if (data.ok && data.name && data.role) {
-                setError(null);
+                setLoginError(null);
+                setRegisterError(null);
                 setUser({ name: data.name, role: data.role });
-            } 
+            }
             setLoading(false);
         })
         .catch((error) => {
             console.error(error);
-            setError(error instanceof Error ? error.message : 'Failed to load user data');
+            setLoginError(error instanceof Error ? error.message : 'Failed to load user data');
             setUser(null);
         })
         .finally(() => {
@@ -40,39 +43,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const login = useCallback(async (email: string, password: string) => {
-        setError(null);
+        setLoginError(null);
+        setLoginSuccessMessage(null);
         try {
             const data = await apiLogin(email, password);
             if (data.name && data.role) {
-                setError(null);
+                setLoginError(null);
                 setUser({ name: data.name, role: data.role });
-                setSuccessMessage('Login successful');
+                setLoginSuccessMessage('Login successful');
             } else {
-                setError(data.error || 'Failed to login');
+                setLoginError(data.error || 'Failed to login');
             }
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to login');
+            setLoginError(err instanceof Error ? err.message : 'Failed to login');
         }
     }, []);
 
     const logout = useCallback(async () => {
         try {
             await apiLogout();
-            setError(null);
+            setLoginError(null);
+            setRegisterError(null);
+            setLoginSuccessMessage(null);
+            setRegisterSuccessMessage(null);
             setUser(null);
-            setSuccessMessage('Logout successful');
         } catch (error) {
-            setError(error instanceof Error ? error.message : 'Failed to logout');
+            setLoginError(error instanceof Error ? error.message : 'Failed to logout');
         }
     }, []);
 
     const register = useCallback(async (name: string, email: string, password: string) => {
-        setError(null);
+        setRegisterError(null);
+        setRegisterSuccessMessage(null);
         try {
             await apiRegister(name, email, password);
-            setSuccessMessage('Registration successful');
+            setRegisterSuccessMessage('Registration successful');
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to register");
+            setRegisterError(err instanceof Error ? err.message : "Failed to register");
         }
     }, []);
 
@@ -82,8 +89,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         logout,
         register,
-        error,
-        successMessage,
+        loginError,
+        registerError,
+        loginSuccessMessage,
+        registerSuccessMessage,
     };
 
     return (

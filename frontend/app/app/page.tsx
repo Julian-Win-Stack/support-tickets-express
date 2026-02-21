@@ -2,7 +2,7 @@
 import { CreateTicketSection } from "./components/CreateTicketSection";
 import { TicketListingSection } from "./components/TicketListingSection";
 import { TicketEditSection } from "./components/TicketEditSection";
-import { NoteCreationSection } from "./components/NoteCreationSection";
+import { NoteSection } from "./components/NoteSection";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
 import { getTickets, getTicketById, updateTicket } from "@/lib/api";
@@ -79,7 +79,7 @@ export default function HomePage() {
          refreshTickets={refreshTickets}
          refreshTicketsAfterEdit={refreshTicketsAfterEdit}
          />
-        <NoteCreationSection 
+        <NoteSection 
         selectedTicket={selectedTicket}
         />
       </div>

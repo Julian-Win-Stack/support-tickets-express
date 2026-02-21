@@ -1,7 +1,6 @@
 "use client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Note, Ticket } from "@/types";
-import { useRouter } from "next/navigation";
 import { getNotes, createNote } from "@/lib/api";
 import { useEffect, useState } from "react";
 
@@ -12,38 +11,41 @@ const btnClass =
   "py-2.5 px-3 rounded-[10px] border border-[#2a3b62] bg-[#1c2a47] text-[#e8eefc] cursor-pointer hover:brightness-110 transition-[filter]";
 
 
-export function NoteCreationSection({ selectedTicket }: { selectedTicket: Ticket | null }) {
-  const { logout, user } = useAuth();
+export function NoteSection({ selectedTicket }: { selectedTicket: Ticket | null }) {
+  const { user } = useAuth();
   const [notes, setNotes] = useState<Note[]>([]);
   const [currentNote, setCurrentNote] = useState<string | null>(null);
-  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  function handleLogout() {
-    logout();
-    router.push('/login');
-  }
 
   async function handleAddNote() {
     if (currentNote && selectedTicket) {
+      setError(null);
+      setSuccessMessage(null);
       try {
         await createNote(selectedTicket.id, currentNote);
         const res = await getNotes(selectedTicket.id);
         setNotes(res.data);
         setCurrentNote(null);
+        setSuccessMessage("Note added successfully");
       } catch (error) {
         console.error(error);
+        setError("Failed to add note");
       }
     }
   }
 
   useEffect(() => {
-    if (selectedTicket) {
+    if (selectedTicket && user && user.role === 'admin') {
+      setError(null);
       (async () => {
         const res = await getNotes(selectedTicket.id);
         setNotes(res.data);
       })().catch((error) => {
         console.error(error);
         setNotes([]);
+        setError("Failed to get notes");
       });
       setCurrentNote(null);
     }
@@ -75,6 +77,8 @@ export function NoteCreationSection({ selectedTicket }: { selectedTicket: Ticket
       >
         Add note
       </button>
+      {successMessage && <p className="m-0 text-sm text-[#e8b86d]">{successMessage}</p>}
+      {error && <p className="m-0 text-sm text-[#e8b86d]">{error}</p>}
       <h3 className="m-0 text-base font-medium text-[#e8eefc] mb-2">
         Notes
       </h3>
@@ -90,16 +94,6 @@ export function NoteCreationSection({ selectedTicket }: { selectedTicket: Ticket
           <p className="m-0 text-sm text-[#e8eefc]">{note.body}</p>
         </div>
       ))}
-      {user &&
-        <div className="my-4 flex justify-start">
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="text-sm py-2 px-3 rounded-[8px] border border-[#6b2b36] bg-[#3a1e25] text-[#e8eefc] cursor-pointer hover:brightness-110 transition-[filter]"
-        >
-          Logout and go to login page
-        </button>
-      </div>}
     </div>
     )
   );

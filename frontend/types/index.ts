@@ -32,8 +32,10 @@ export type AuthContextValue = {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
-  error: string | null;
-  successMessage: string | null;
+  loginError: string | null;
+  registerError: string | null;
+  loginSuccessMessage: string | null;
+  registerSuccessMessage: string | null;
 };
 
 export type AdminUser = {

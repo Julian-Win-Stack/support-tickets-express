@@ -29,6 +29,8 @@ export function TicketEditSection({ selectedTicket, updateTicket, refreshTickets
   const [title, setTitle] = useState<string>("");
   const [body, setBody] = useState<string>("");
   const [admins, setAdmins] = useState<AdminUser[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     setAdmins([]);
@@ -162,6 +164,8 @@ export function TicketEditSection({ selectedTicket, updateTicket, refreshTickets
          type="button"
           className={`${btnClass} w-full`}
           onClick={async () => {
+            setError(null);
+            setSuccessMessage(null);
             try {
               if (user?.role === 'admin') {
                 await updateTicket(selectedTicket.id, "", "", selectedStatus);
@@ -170,13 +174,17 @@ export function TicketEditSection({ selectedTicket, updateTicket, refreshTickets
                 await updateTicket(selectedTicket.id, title, body, "");
               }
               await refreshTicketsAfterEdit();
+              setSuccessMessage("Edits saved successfully");
             } catch (e) {
               console.error(e);
+              setError("Failed to save edits");
             }
           }}
           >
           Save edits
         </button>
+        {successMessage && <p className="m-0 text-sm text-[#e8b86d]">{successMessage}</p>}
+        {error && <p className="m-0 text-sm text-[#e8b86d]">{error}</p>}
       </div>
     </div>
     )

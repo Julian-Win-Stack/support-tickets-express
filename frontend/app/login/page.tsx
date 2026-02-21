@@ -9,7 +9,7 @@ export default function LoginPage() {
   const [registerEmail, setRegisterEmail] = useState<string | null>(null);
   const [loginPassword, setLoginPassword] = useState<string | null>(null);
   const [registerPassword, setRegisterPassword] = useState<string | null>(null);
-  const { logout, login, register, error, user, successMessage } = useAuth(); 
+  const { login, register, loginError, registerError, loginSuccessMessage, registerSuccessMessage, user } = useAuth(); 
   const router = useRouter();
 
   useEffect(() => {
@@ -19,22 +19,26 @@ export default function LoginPage() {
   }, [user]);
 
   function handleRegister(e: React.FormEvent<HTMLFormElement>) {
+    try {
     e.preventDefault();
     register(name ?? '', registerEmail ?? '', registerPassword ?? '');
     setName('');
     setRegisterEmail('');
     setRegisterPassword('');
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   function handleLogin(e: React.FormEvent<HTMLFormElement>) {
+    try {
     e.preventDefault();
-    login(loginEmail ?? '', loginPassword ?? '');
-    setLoginEmail('');
-    setLoginPassword('');
-  }
-
-  function handleLogout() {
-    logout();
+      login(loginEmail ?? '', loginPassword ?? '');
+      setLoginEmail('');
+      setLoginPassword('');
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   return (
@@ -108,6 +112,8 @@ export default function LoginPage() {
             >
               Register
             </button>
+            {registerError && <p className="text-sm text-red-500 mt-2 m-0">{registerError}</p>}
+            {registerSuccessMessage && <p className="text-sm text-green-500 mt-2 m-0">{registerSuccessMessage}</p>}
           </form>
         </div>
 
@@ -159,19 +165,9 @@ export default function LoginPage() {
             >
               Login
             </button>
-            {user && 
-            <div className="mt-1 flex justify-start">
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="text-sm py-2 px-3 rounded-[8px] border border-[#6b2b36] bg-[#3a1e25] text-[#e8eefc] cursor-pointer hover:brightness-110 transition-[filter]"
-              >
-                Logout
-              </button>
-            </div>}
+            {loginError && <p className="text-sm text-red-500 mt-2 m-0">{loginError}</p>}
+            {loginSuccessMessage && <p className="text-sm text-green-500 mt-2 m-0">{loginSuccessMessage}</p>}
           </form>
-          <p className="text-sm text-yellow-500 mt-4 mb-2">{error}</p>
-          <p className="text-sm text-yellow-500 mt-4 mb-2">{successMessage}</p>
         </div>
       </div>
     </main>
