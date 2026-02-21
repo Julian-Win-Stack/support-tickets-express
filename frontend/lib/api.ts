@@ -165,6 +165,17 @@ export async function markOneNotificationRead(notificationId: number) {
   return data;
 }
 
+export async function unReadOneNotification(notificationId: number) {
+  const res = await fetch(`${API_URL}/api/notifications/${notificationId}/unread`, {
+    method: "PATCH",
+    credentials: "include",
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to mark notification as unread");
+  return data;
+}
+
+
 export async function markAllNotificationsRead() {
   const res = await fetch(`${API_URL}/api/notifications/read-all`, {
     method: "PATCH",

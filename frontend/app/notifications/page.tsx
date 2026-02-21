@@ -1,17 +1,49 @@
 'use client';
 import Link from "next/link";
-import { getMyNotifications } from "@/lib/api";
+import { getMyNotifications, markOneNotificationRead, unReadOneNotification } from "@/lib/api";
 import { useState, useEffect } from "react";
 import type { Notification } from "@/types";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const { user } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
     getMyNotifications()
       .then((data) => setNotifications(data.data))
       .catch(() => setNotifications([]));
   }, []);
+
+  useEffect(() => {
+    if (!user) {
+      router.replace('/login');
+    }
+  }, [user]);
+
+  const handleMarkRead = async (id: number) => {
+    try {
+      await markOneNotificationRead(id);
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, read_at: new Date().toISOString().slice(0, 19).replace('T', ' ') } : n))
+      );
+    } catch (error) {
+      console.error(error)
+    }
+  };
+
+  const handleMarkUnread = async (id: number) => {
+    try {
+      await unReadOneNotification(id);
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, read_at: null } : n))
+      );
+    } catch (error) {
+      console.error(error)
+    }
+  };
 
   return (
     <main className="max-w-[1200px] mx-auto px-4 py-6">
@@ -56,12 +88,23 @@ export default function NotificationsPage() {
                 {n.message}
               </p>
               <div className="flex justify-end mt-1">
-                <button
-                  type="button"
-                  className="py-1.5 px-3 rounded-[8px] border border-[#2a3b62] bg-[#121a2a] text-[#aab6d6] text-xs font-medium cursor-pointer hover:brightness-110 transition-[filter]"
-                >
-                  Mark as read
-                </button>
+                {isRead ? (
+                  <button
+                    type="button"
+                    onClick={() => handleMarkUnread(n.id)}
+                    className="py-1.5 px-3 rounded-[8px] border border-[#2a3b62] bg-[#121a2a] text-[#aab6d6] text-xs font-medium cursor-pointer hover:brightness-110 transition-[filter]"
+                  >
+                    Mark as unread
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => handleMarkRead(n.id)}
+                    className="py-1.5 px-3 rounded-[8px] border border-[#2a3b62] bg-[#121a2a] text-[#aab6d6] text-xs font-medium cursor-pointer hover:brightness-110 transition-[filter]"
+                  >
+                    Mark as read
+                  </button>
+                )}
               </div>
             </article>
             );
