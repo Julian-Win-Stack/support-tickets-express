@@ -1,6 +1,6 @@
 'use client';
 import Link from "next/link";
-import { getMyNotifications, markOneNotificationRead, unReadOneNotification } from "@/lib/api";
+import { getMyNotifications, markOneNotificationRead, unReadOneNotification, markAllNotificationsRead } from "@/lib/api";
 import { useState, useEffect } from "react";
 import type { Notification } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
@@ -45,12 +45,25 @@ export default function NotificationsPage() {
     }
   };
 
+  const handleMarkAllRead = async () => {
+    try {
+      await markAllNotificationsRead();
+      const readAt = new Date().toISOString().slice(0, 19).replace('T', ' ');
+      setNotifications((prev) =>
+        prev.map((n) => ({ ...n, read_at: readAt }))
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <main className="max-w-[1200px] mx-auto px-4 py-6">
       <div className="w-full max-w-[720px] mx-auto">
         <div className="flex justify-between items-center mb-6">
           <button
             type="button"
+            onClick={handleMarkAllRead}
             className="py-2 px-4 rounded-[10px] border border-[#2a3b62] bg-[#1c2a47] text-[#e8eefc] text-sm font-medium cursor-pointer hover:brightness-110 transition-[filter]"
           >
             Mark all read
