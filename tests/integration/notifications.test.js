@@ -14,6 +14,8 @@ describe('notifications', () => {
     let adminANotificationId;
     /** @type {number} One of Admin B's notification IDs (for "cannot mark someone else's" test) */
     let adminBNotificationId;
+    /** @type {number} One of Admin A's read notification IDs (for unread test) */
+    let adminAReadNotificationId;
     /** @type {{ ticketId: number }} */
     let ids;
 
@@ -36,6 +38,8 @@ describe('notifications', () => {
         }
         const adminARow = await db.get('SELECT id FROM notifications WHERE user_id = ? AND read_at IS NULL LIMIT 1', [adminId]);
         adminANotificationId = adminARow.id;
+        const adminAReadRow = await db.get('SELECT id FROM notifications WHERE user_id = ? AND read_at IS NOT NULL LIMIT 1', [adminId]);
+        adminAReadNotificationId = adminAReadRow.id;
 
         // Admin B: 5 unread
         for (let i = 0; i < 5; i++) {
@@ -91,6 +95,27 @@ describe('notifications', () => {
             const agent = request.agent(app);
             await loginAsAdmin(agent);
             const res = await agent.patch(`/api/notifications/${adminBNotificationId}/read`);
+            expect(res.status).toBe(404);
+        });
+    });
+
+    describe('PATCH /api/notifications/:id/unread', () => {
+        it('can mark own notification as unread', async () => {
+            const agent = request.agent(app);
+            await loginAsAdmin(agent);
+            const res = await agent.patch(`/api/notifications/${adminAReadNotificationId}/unread`);
+            expect(res.status).toBe(200);
+            expect(res.body.ok).toBe(true);
+
+            const db = getDB();
+            const row = await db.get('SELECT read_at FROM notifications WHERE id = ?', [adminAReadNotificationId]);
+            expect(row.read_at).toBeNull();
+        });
+
+        it('cannot mark someone else\'s notification (returns 404)', async () => {
+            const agent = request.agent(app);
+            await loginAsAdmin(agent);
+            const res = await agent.patch(`/api/notifications/${adminBNotificationId}/unread`);
             expect(res.status).toBe(404);
         });
     });
