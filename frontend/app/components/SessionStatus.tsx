@@ -1,6 +1,7 @@
 'use client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
+import { NotificationsButton } from '@/app/components/NotificationBell';
 
 const SessionStatus = () => {
   const { user, logout } = useAuth();
@@ -19,6 +20,7 @@ const SessionStatus = () => {
     </div>
     {user && (
       <div className="flex justify-end">
+        {user.role === 'admin' && <NotificationsButton />}
         <button
           type="button"
           onClick={handleLogout}

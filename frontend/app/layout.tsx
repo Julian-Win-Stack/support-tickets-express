@@ -22,6 +22,7 @@ export default function RootLayout({
             <h1 className="text-3xl font-bold shrink-0">Support Tickets</h1>
           <div className="flex-1 flex justify-end">
             <SessionStatus />
+            
           </div>
           </header>
           {children}

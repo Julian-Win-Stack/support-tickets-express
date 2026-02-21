@@ -1,20 +1,25 @@
 import bcrypt from 'bcrypt';
-import { getDBConnection } from '../db/db.js';
+import { initDBConnection } from '../db/db.js';
+import { initDB } from '../db/initDB.js';
 
-try{
-    const password = 'admin2';
+try {
+    await initDBConnection();
+    await initDB();
+
+    const password = 'adminjulian';
     const hashedPassword = await bcrypt.hash(password, 10);
-    
-    const db = await getDBConnection();
-    
-    
-     db.run(
-        `INSERT INTO users (name, email, password_hash, role)
-        VALUES ('admin2', 'admin2@gmail.com', '${hashedPassword}', 'admin')`
-    )
 
-}catch (error){
+    const db = await initDBConnection();
+    await db.run(
+        `INSERT OR IGNORE INTO users (name, email, password_hash, role)
+         VALUES (?, ?, ?, ?)`,
+        ['Admin Julian', 'admin.julian@gmail.com', hashedPassword, 'admin']
+    );
+
+} catch (error) {
     console.error(error);
+} finally {
+    process.exit(0);
 }
 
 
