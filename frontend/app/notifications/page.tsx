@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -18,10 +18,10 @@ export default function NotificationsPage() {
   }, []);
 
   useEffect(() => {
-    if (!user) {
+    if (!user && !loading) {
       router.replace('/login');
     }
-  }, [user]);
+  }, [user, loading]);
 
   const handleMarkRead = async (id: number) => {
     try {
