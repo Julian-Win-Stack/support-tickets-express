@@ -21,8 +21,7 @@ CREATE TABLE IF NOT EXISTS tickets (
 -- idx_tickets_assigned_admin added by migration 002_add_assigned_admin_to_tickets.sql
 -- escalated_at added by migration 003_add_escalated_at_to_tickets.sql
 -- idx_tickets_escalated_at added by migration 003_add_escalated_at_to_tickets.sql
--- read_at added by migration 005_notifications_read_at_ticket_id.sql
--- ticket_id added by migration 005_notifications_read_at_ticket_id.sql
+
 
 CREATE TABLE IF NOT EXISTS notes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -75,4 +74,6 @@ CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications (user_id);
 CREATE INDEX IF NOT EXISTS idx_notifications_created_at ON notifications (created_at);
 -- job_id (UNIQUE) added by migration 001_add_job_id_to_notifications.sql
 -- idx_notifications_job_id added by migration 001_add_job_id_to_notifications.sql
+-- read_at added by migration 005_notifications_read_at_ticket_id.sql
+-- ticket_id added by migration 005_notifications_read_at_ticket_id.sql
 
