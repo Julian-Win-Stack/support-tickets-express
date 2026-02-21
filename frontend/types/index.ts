@@ -44,3 +44,12 @@ export type AdminUser = {
   email: string;
   role: string;
 };
+
+export type Notification = {
+  id: number;
+  subject: string;
+  message: string;
+  ticket_id: number | null;
+  read_at: string | null;
+  created_at: string;
+};

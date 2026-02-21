@@ -51,7 +51,7 @@ export async function getUnreadCount(req: Request, res: Response): Promise<void>
  * PATCH /api/notifications/:id/read
  * Mark one notification as read.
  */
-export async function markOneRead(req: Request, res: Response): Promise<void> {
+export async function markOneNotificationRead(req: Request, res: Response): Promise<void> {
     try {
         const userId = req.session.userId;
         if (!userId) {
@@ -83,7 +83,7 @@ export async function markOneRead(req: Request, res: Response): Promise<void> {
  * PATCH /api/notifications/read-all
  * Mark all of the current admin's notifications as read.
  */
-export async function markAllRead(req: Request, res: Response): Promise<void> {
+export async function markAllNotificationsRead(req: Request, res: Response): Promise<void> {
     try {
         const userId = req.session.userId;
         if (!userId) {

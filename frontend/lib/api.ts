@@ -138,3 +138,41 @@ export async function createNote(ticketId: number, body: string) {
   if (!res.ok) throw new Error(data.error || "Failed to create note");
   return data;
 }
+
+
+export async function getMyNotifications() {
+  const res = await fetch(`${API_URL}/api/notifications`, { credentials: "include" });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to get notifications");
+  return data;
+}
+
+
+export async function getUnreadNotificationCount() {
+  const res = await fetch(`${API_URL}/api/notifications/unread-count`, { credentials: "include" });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to get unread notification count");
+  return data;
+}
+
+export async function markOneNotificationRead(notificationId: number) {
+  const res = await fetch(`${API_URL}/api/notifications/${notificationId}/read`, {
+    method: "PATCH",
+    credentials: "include",
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to mark notification as read");
+  return data;
+}
+
+export async function markAllNotificationsRead() {
+  const res = await fetch(`${API_URL}/api/notifications/read-all`, {
+    method: "PATCH",
+    credentials: "include",
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to mark all notifications as read");
+  return data;
+}
+
+
