@@ -22,16 +22,19 @@ export async function sendNotification(userId: number, channel: string, subject:
 
 
 /**
- * List notifications for one user, newest first. Optional limit (default 50).
+ * List notifications for one user, newest first.
+ * limit is optional; when omitted, returns all notifications.
+ * Used by adminController (admin tooling).
  */
-export async function getNotificationsByUser(userId: number, limit = 50): Promise<Notifications[]> {
+export async function getNotificationsByUser(userId: number, limit?: number): Promise<Notifications[]> {
     const db = getDB();
-    const rows = await db.all(`
-        SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT ?
-        `, [userId, limit]);
+    const sql = limit != null
+        ? `SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT ?`
+        : `SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC`;
+    const params = limit != null ? [userId, limit] : [userId];
+    const rows = await db.all(sql, params);
     return rows;
 }
-
 
 /**
  * List the latest notifications across all users (for admin "latest 50").

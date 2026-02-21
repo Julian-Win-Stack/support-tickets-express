@@ -10,6 +10,7 @@ import { ticketRouter } from './routes/ticketRouter.js';
 import { notesRouter } from './routes/notesRouter.js';
 import { initDBConnection } from './db/db.js';
 import { adminRouter } from './routes/adminRouter.js';
+import { notificationsRouter } from './routes/notificationsRouter.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -67,5 +68,6 @@ app.use('/api/auth', authRouter);
 app.use('/api/ticket', ticketRouter);
 app.use('/api/notes', notesRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/notifications', notificationsRouter);
 
 export { app };
