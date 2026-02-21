@@ -2,7 +2,8 @@ import express from 'express';
 import {
     listMyNotifications,
     getUnreadCount,
-    markOneNotificationRead,
+    readOneNotification,
+    unReadOneNotification,
     markAllNotificationsRead,
 } from '../controllers/notificationsController.js';
 import { authUser } from '../middleware/authUser.js';
@@ -15,4 +16,5 @@ notificationsRouter.get('/unread-count', authUser, requireAdmin, getUnreadCount)
 notificationsRouter.patch('/read-all', authUser, requireAdmin, markAllNotificationsRead);
 
 notificationsRouter.get('/', authUser, requireAdmin, listMyNotifications);
-notificationsRouter.patch('/:id/read', authUser, requireAdmin, markOneNotificationRead);
+notificationsRouter.patch('/:id/read', authUser, requireAdmin, readOneNotification);
+notificationsRouter.patch('/:id/unread', authUser, requireAdmin, unReadOneNotification);

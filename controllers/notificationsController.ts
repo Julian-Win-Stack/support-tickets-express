@@ -51,7 +51,7 @@ export async function getUnreadCount(req: Request, res: Response): Promise<void>
  * PATCH /api/notifications/:id/read
  * Mark one notification as read.
  */
-export async function markOneNotificationRead(req: Request, res: Response): Promise<void> {
+export async function readOneNotification(req: Request, res: Response): Promise<void> {
     try {
         const userId = req.session.userId;
         if (!userId) {
@@ -66,6 +66,38 @@ export async function markOneNotificationRead(req: Request, res: Response): Prom
         const db = getDB();
         const result = await db.run(
             `UPDATE notifications SET read_at = datetime('now') WHERE id = ? AND user_id = ?`,
+            [id, userId]
+        );
+        if ((result.changes ?? 0) === 0) {
+            res.status(404).json({ error: 'Notification not found' });
+            return;
+        }
+        res.json({ ok: true });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server failed. Please try again.' });
+    }
+}
+
+/**
+ * PATCH /api/notifications/:id/unread
+ * Mark one notification as unread (set read_at to NULL).
+ */
+export async function unReadOneNotification(req: Request, res: Response): Promise<void> {
+    try {
+        const userId = req.session.userId;
+        if (!userId) {
+            res.status(401).json({ error: 'Not authenticated' });
+            return;
+        }
+        const id = Number(req.params.id);
+        if (!Number.isInteger(id) || id < 1) {
+            res.status(400).json({ error: 'Invalid notification id' });
+            return;
+        }
+        const db = getDB();
+        const result = await db.run(
+            `UPDATE notifications SET read_at = NULL WHERE id = ? AND user_id = ?`,
             [id, userId]
         );
         if ((result.changes ?? 0) === 0) {
@@ -101,3 +133,5 @@ export async function markAllNotificationsRead(req: Request, res: Response): Pro
         res.status(500).json({ error: 'Server failed. Please try again.' });
     }
 }
+
+
