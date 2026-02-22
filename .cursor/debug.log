@@ -1449,3 +1449,27 @@
 {"location":"db/initDB.js:initDB","message":"initDB entered","data":{},"timestamp":1771462121070,"sessionId":"debug-session","hypothesisId":"H1"}
 {"location":"db/initDB.js:beforeExec","message":"before exec schema","data":{"schemaPath":"/Users/phyonyanwinn/Library/Mobile Documents/com~apple~CloudDocs/Project/ProJect/support-tickets-express/db/schema.sql"},"timestamp":1771462121070,"sessionId":"debug-session","hypothesisId":"H2"}
 {"location":"db/initDB.js:afterExec","message":"schema exec done","data":{},"timestamp":1771462121078,"sessionId":"debug-session","hypothesisId":"H2"}
+{"location":"app.js:beforeInitDB","message":"app.js loading, about to initDB","data":{},"timestamp":1771802952027,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"db/initDB.js:initDB","message":"initDB entered","data":{},"timestamp":1771802952046,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"db/initDB.js:beforeExec","message":"before exec schema","data":{"schemaPath":"/Users/phyonyanwinn/Library/Mobile Documents/com~apple~CloudDocs/Project/ProJect/support-tickets-express/db/schema.sql"},"timestamp":1771802952047,"sessionId":"debug-session","hypothesisId":"H2"}
+{"location":"db/initDB.js:afterExec","message":"schema exec done","data":{},"timestamp":1771802952064,"sessionId":"debug-session","hypothesisId":"H2"}
+{"location":"app.js:beforeInitDB","message":"app.js loading, about to initDB","data":{},"timestamp":1771802953033,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"db/initDB.js:initDB","message":"initDB entered","data":{},"timestamp":1771802953046,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"db/initDB.js:beforeExec","message":"before exec schema","data":{"schemaPath":"/Users/phyonyanwinn/Library/Mobile Documents/com~apple~CloudDocs/Project/ProJect/support-tickets-express/db/schema.sql"},"timestamp":1771802953046,"sessionId":"debug-session","hypothesisId":"H2"}
+{"location":"app.js:beforeInitDB","message":"app.js loading, about to initDB","data":{},"timestamp":1771802953042,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"db/initDB.js:afterExec","message":"schema exec done","data":{},"timestamp":1771802953060,"sessionId":"debug-session","hypothesisId":"H2"}
+{"location":"db/initDB.js:initDB","message":"initDB entered","data":{},"timestamp":1771802953054,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"db/initDB.js:beforeExec","message":"before exec schema","data":{"schemaPath":"/Users/phyonyanwinn/Library/Mobile Documents/com~apple~CloudDocs/Project/ProJect/support-tickets-express/db/schema.sql"},"timestamp":1771802953055,"sessionId":"debug-session","hypothesisId":"H2"}
+{"location":"app.js:beforeInitDB","message":"app.js loading, about to initDB","data":{},"timestamp":1771802953050,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"db/initDB.js:afterExec","message":"schema exec done","data":{},"timestamp":1771802953071,"sessionId":"debug-session","hypothesisId":"H2"}
+{"location":"db/initDB.js:initDB","message":"initDB entered","data":{},"timestamp":1771802953065,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"db/initDB.js:beforeExec","message":"before exec schema","data":{"schemaPath":"/Users/phyonyanwinn/Library/Mobile Documents/com~apple~CloudDocs/Project/ProJect/support-tickets-express/db/schema.sql"},"timestamp":1771802953066,"sessionId":"debug-session","hypothesisId":"H2"}
+{"location":"db/initDB.js:afterExec","message":"schema exec done","data":{},"timestamp":1771802953080,"sessionId":"debug-session","hypothesisId":"H2"}
+{"location":"app.js:beforeInitDB","message":"app.js loading, about to initDB","data":{},"timestamp":1771802996372,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"db/initDB.js:initDB","message":"initDB entered","data":{},"timestamp":1771802996381,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"db/initDB.js:beforeExec","message":"before exec schema","data":{"schemaPath":"/Users/phyonyanwinn/Library/Mobile Documents/com~apple~CloudDocs/Project/ProJect/support-tickets-express/db/schema.sql"},"timestamp":1771802996382,"sessionId":"debug-session","hypothesisId":"H2"}
+{"location":"db/initDB.js:afterExec","message":"schema exec done","data":{},"timestamp":1771802996388,"sessionId":"debug-session","hypothesisId":"H2"}
+{"location":"app.js:beforeInitDB","message":"app.js loading, about to initDB","data":{},"timestamp":1771803062886,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"db/initDB.js:initDB","message":"initDB entered","data":{},"timestamp":1771803062895,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"db/initDB.js:beforeExec","message":"before exec schema","data":{"schemaPath":"/Users/phyonyanwinn/Library/Mobile Documents/com~apple~CloudDocs/Project/ProJect/support-tickets-express/db/schema.sql"},"timestamp":1771803062895,"sessionId":"debug-session","hypothesisId":"H2"}
+{"location":"db/initDB.js:afterExec","message":"schema exec done","data":{},"timestamp":1771803062902,"sessionId":"debug-session","hypothesisId":"H2"}
