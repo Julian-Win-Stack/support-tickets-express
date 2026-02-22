@@ -60,10 +60,12 @@ const VALID_AUDIT_ACTIONS = new Set([
     'user_logged_out',
 ]);
 
+const VALID_ENTITY_TYPES = new Set(['ticket', 'notes', 'user']);
+
 /**
- * GET /api/admin/audit-events?offset=0&action=ticket_created (optional)
+ * GET /api/admin/audit-events?offset=0&action=ticket_created&entity_type=ticket (optional)
  * List audit events, newest first. Limit 50 per request. Offset for load-more pagination.
- * Optional action filter: ?action=ticket_assigned, ?action=ticket_unassigned, etc.
+ * Optional filters: ?action=..., ?entity_type=ticket|notes|user
  */
 export async function listAuditEvents(req: Request, res: Response): Promise<void> {
     try {
@@ -82,20 +84,35 @@ export async function listAuditEvents(req: Request, res: Response): Promise<void
             res.status(400).json({ error: 'Invalid action' });
             return;
         }
+        const rawEntityType = req.query.entity_type;
+        const entityType =
+            typeof rawEntityType === 'string' && rawEntityType.trim()
+                ? rawEntityType.trim()
+                : undefined;
+        if (entityType !== undefined && !VALID_ENTITY_TYPES.has(entityType)) {
+            res.status(400).json({ error: 'Invalid entity_type' });
+            return;
+        }
         const db = getDB();
-        const sql = action
-            ? `SELECT a.id, a.actor_user_id, a.action, a.entity_type, a.entity_id, a.before, a.after, a.created_at,
-               u.name AS actor_name, u.email AS actor_email, u.role AS actor_role
-               FROM audit_events a
-               LEFT JOIN users u ON a.actor_user_id = u.id
-               WHERE a.action = ?
-               ORDER BY a.created_at DESC LIMIT 50 OFFSET ?`
-            : `SELECT a.id, a.actor_user_id, a.action, a.entity_type, a.entity_id, a.before, a.after, a.created_at,
-               u.name AS actor_name, u.email AS actor_email, u.role AS actor_role
-               FROM audit_events a
-               LEFT JOIN users u ON a.actor_user_id = u.id
-               ORDER BY a.created_at DESC LIMIT 50 OFFSET ?`;
-        const params = action ? [action, offset] : [offset];
+        const conditions: string[] = [];
+        const params: (string | number)[] = [];
+        if (action) {
+            conditions.push('a.action = ?');
+            params.push(action);
+        }
+        if (entityType) {
+            conditions.push('a.entity_type = ?');
+            params.push(entityType);
+        }
+        const whereClause =
+            conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+        params.push(offset);
+        const sql = `SELECT a.id, a.actor_user_id, a.action, a.entity_type, a.entity_id, a.before, a.after, a.created_at,
+             u.name AS actor_name, u.email AS actor_email, u.role AS actor_role
+             FROM audit_events a
+             LEFT JOIN users u ON a.actor_user_id = u.id
+             ${whereClause}
+             ORDER BY a.created_at DESC LIMIT 50 OFFSET ?`;
         const rows = await db.all(sql, params);
         res.json({ data: rows });
         return;
