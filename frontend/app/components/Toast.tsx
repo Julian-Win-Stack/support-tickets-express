@@ -13,6 +13,7 @@ type ToastProps = {
 };
 
 export function Toast({ toast, onRemove }: ToastProps) {
+  
   useEffect(() => {
     if (!toast) return;
 

@@ -1,0 +1,147 @@
+---
+alwaysApply: true
+---
+
+When generating commit messages, follow these standards strictly.
+
+
+1. Use Imperative Mood (Required)
+
+Write commit subjects as commands.
+
+Correct:
+	•	Add audit log for ticket status changes
+	•	Fix race condition in job worker
+	•	Refactor DB connection to reuse single instance
+	•	Remove unused route
+
+Incorrect:
+	•	Added audit log
+	•	Adding audit log
+	•	Fixes race condition
+	•	I added feature
+
+Reason:
+Git reads it as:
+“If applied, this commit will ___.”
+
+⸻
+
+2. Keep Subject Line Concise (50–72 characters)
+	•	Aim for 50–72 characters.
+	•	Short enough to scan.
+	•	Long enough to be precise.
+	•	Do NOT sacrifice clarity just to hit 50.
+
+Good:
+	•	Add background job system for notifications
+	•	Enforce role-based filtering on ticket queries
+
+Bad:
+	•	Improve backend
+	•	Final changes
+	•	Update stuff
+
+⸻
+
+3. One Commit = One Logical Change (Required)
+
+Each commit must represent one logical change.
+
+Do NOT combine unrelated changes.
+
+Bad:
+	•	Add login, fix bug, update CSS
+
+Good:
+	•	Add session regeneration on login
+	•	Fix incorrect status filtering for admin
+
+⸻
+
+4. Be Specific About the Outcome
+
+Describe what capability or rule changed.
+
+Good:
+	•	Make job processing idempotent using dedupe_key
+	•	Regenerate session ID after successful login
+	•	Block non-admin users from updating ticket status
+
+Avoid vague descriptions:
+	•	Improve system
+	•	Update logic
+	•	Minor fixes
+
+⸻
+
+5. Use a Body for Medium or Large Changes
+
+If the change is non-trivial, include a body.
+
+Structure:
+
+<subject line>
+
+
+<blank line>
+Explanation of what changed and why.
+Include important tradeoffs or constraints.
+Keep lines readable (~72 chars recommended).
+
+
+Example:
+
+feat: enqueue notification job on ticket status change
+
+Adds job row with type ‘ticket_status_changed’.
+Prevents duplicate inserts using dedupe_key.
+Worker processes pending jobs asynchronously.
+
+The body should explain WHY when relevant, not just WHAT.
+
+⸻
+
+6. Use Conventional Commits Format (Preferred)
+
+Use this structure:
+
+type: short summary
+
+Common types:
+	•	feat
+	•	fix
+	•	refactor
+	•	test
+	•	docs
+	•	chore
+
+Examples:
+
+feat: add audit logging for ticket updates
+fix: prevent duplicate job enqueueing
+refactor: extract ticket constraint builder
+test: add worker process integration tests
+docs: update README with architecture overview
+
+Be consistent. Do not mix formats.
+
+⸻
+
+7. Do Not Mention Effort or Emotions
+
+Do NOT write:
+	•	finally works
+	•	big update
+	•	massive improvement
+	•	cleaned everything
+
+Commits describe system changes, not your feelings.
+
+⸻
+
+Core Principle
+
+Commit messages describe system capabilities or constraints introduced or modified — not implementation effort.
+
+Always write commits that make the project history readable like a technical change log.

@@ -23,9 +23,10 @@ export function NotificationsButton() {
   return (
     <Link
       href="/notifications"
-      className="relative inline-flex p-2 rounded-md hover:bg-white/10 mr-2 mt-4"
+      aria-label={count > 0 ? `View notifications (${count} unread)` : "View notifications"}
+      className="group relative inline-flex p-2 rounded-md mr-2 mt-4 focus:outline-none focus:ring-2 focus:ring-[#0e7490] focus:ring-offset-2 focus:ring-offset-[#12121C]"
     >
-      <Bell className="h-5 w-5" />
+      <Bell className="h-5 w-5 transition-transform duration-200 group-hover:scale-110" />
       {count > 0 && (
         <span className="absolute -top-3 right-1 min-w-[18px] h-[18px] px-1 text-[11px] rounded-full bg-red-500 text-white flex items-center justify-center">
           {count > 99 ? '99+' : count}

@@ -1,5 +1,4 @@
 'use client';
-import Link from "next/link";
 import { getMyNotifications, markOneNotificationRead, unReadOneNotification, markAllNotificationsRead } from "@/lib/api";
 import { useState, useEffect } from "react";
 import type { Notification } from "@/types";
@@ -122,15 +121,6 @@ export default function NotificationsPage() {
             </article>
             );
           })}
-        </div>
-
-        <div className="mt-6">
-          <Link
-            href="/app"
-            className="text-sm text-[#0e7490] hover:underline"
-          >
-            ← Back to tickets
-          </Link>
         </div>
       </div>
     </main>
