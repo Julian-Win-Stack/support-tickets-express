@@ -3,6 +3,7 @@ import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { NotificationPollingProvider } from "@/contexts/NotificationPollingContext";
 import SessionStatus from "@/app/components/SessionStatus";
+import GoToTopButton from "@/app/components/GoToTopButton";
 
 export const metadata: Metadata = {
   title: "Support Tickets",
@@ -27,6 +28,7 @@ export default function RootLayout({
               </div>
             </header>
             {children}
+            <GoToTopButton />
           </NotificationPollingProvider>
         </AuthProvider>
       </body>
