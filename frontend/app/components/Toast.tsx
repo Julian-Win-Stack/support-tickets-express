@@ -3,9 +3,8 @@
 import { useEffect } from 'react';
 
 export type ToastItem = {
-  id: string;
   subject: string;
-  message: string;
+  message?: string;
 };
 
 type ToastProps = {
@@ -36,7 +35,9 @@ export function Toast({ toast, onRemove }: ToastProps) {
         role="alert"
       >
         <h4 className="m-0 text-sm font-semibold text-[#e8eefc]">{toast.subject}</h4>
-        <p className="m-0 mt-1 text-xs text-[#aab6d6]">{toast.message}</p>
+        {toast.message && (
+          <p className="m-0 mt-1 text-xs text-[#aab6d6]">{toast.message}</p>
+        )}
       </div>
     </div>
   );
