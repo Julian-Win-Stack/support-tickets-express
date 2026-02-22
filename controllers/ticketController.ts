@@ -386,7 +386,8 @@ export async function assignTicket(req: Request, res: Response): Promise<void> {
         }
 
         let assignedAdminId: number | null = null;
-        if (rawAssignedAdminId === null || rawAssignedAdminId === undefined || rawAssignedAdminId === '') {
+        const isUnassign = rawAssignedAdminId === null || rawAssignedAdminId === undefined || rawAssignedAdminId === '' || rawAssignedAdminId === 0;
+        if (isUnassign) {
             assignedAdminId = null;
         } else {
             const parsed = Number(rawAssignedAdminId);

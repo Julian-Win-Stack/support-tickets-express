@@ -16,7 +16,7 @@ export function NotificationsButton() {
       getUnreadNotificationCount()
         .then((data) => setCount(data.count))
         .catch(() => {});
-    }, 30000);
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -24,7 +24,7 @@ export function NotificationsButton() {
     <Link
       href="/notifications"
       aria-label={count > 0 ? `View notifications (${count} unread)` : "View notifications"}
-      className="group relative inline-flex p-2 rounded-md mr-2 mt-4 focus:outline-none focus:ring-2 focus:ring-[#0e7490] focus:ring-offset-2 focus:ring-offset-[#12121C]"
+      className="group relative inline-flex p-2 rounded-md mr-2 mt-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0e7490] focus-visible:ring-offset-2 focus-visible:ring-offset-[#12121C]"
     >
       <Bell className="h-5 w-5 transition-transform duration-200 group-hover:scale-110" />
       {count > 0 && (

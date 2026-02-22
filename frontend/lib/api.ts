@@ -149,7 +149,7 @@ export async function getMyNotifications() {
 
 
 export async function getUnreadNotificationCount() {
-  const res = await fetch(`${API_URL}/api/notifications/unread-count`, { credentials: "include" });
+  const res = await fetch(`${API_URL}/api/notifications/unread-count`, { credentials: "include", cache: "no-store" });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to get unread notification count");
   return data;
