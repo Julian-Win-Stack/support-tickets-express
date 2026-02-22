@@ -1,14 +1,25 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
+function formatRateLimitMessage(data: { retryAfterSeconds?: number }): string {
+  if (data.retryAfterSeconds == null) {
+    return "Too many attempts. Please try again later.";
+  }
+  const mins = Math.ceil(data.retryAfterSeconds / 60);
+  return `Too many attempts. Try again in ${mins} minute${mins === 1 ? "" : "s"}.`;
+}
+
 export async function login(loginEmail: string, loginPassword: string) {
   const res = await fetch(`${API_URL}/api/auth/login`, {
     method: "POST",
-    credentials: "include",
+    credentials: "include", 
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ loginEmail, loginPassword }),
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Login failed");
+  if (!res.ok) {
+    if (res.status === 429) throw new Error(formatRateLimitMessage(data));
+    throw new Error(data.error || "Login failed");
+  }
   return data;
 }
 
@@ -44,7 +55,10 @@ export async function register(
     }),
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Registration failed");
+  if (!res.ok) {
+    if (res.status === 429) throw new Error(formatRateLimitMessage(data));
+    throw new Error(data.error || "Registration failed");
+  }
   return data;
 }
 
@@ -56,7 +70,10 @@ export async function createTicket(title: string, body: string) {
     body: JSON.stringify({ title, body }),
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Ticket creation failed");
+  if (!res.ok) {
+    if (res.status === 429) throw new Error(formatRateLimitMessage(data));
+    throw new Error(data.error || "Ticket creation failed");
+  }
   return data;
 }
 
