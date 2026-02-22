@@ -48,6 +48,32 @@ export async function listNotifications(req: Request, res: Response): Promise<vo
 }
 
 /**
+ * GET /api/admin/audit-events?offset=0
+ * List audit events, newest first. Limit 50 per request. Offset for load-more pagination.
+ */
+export async function listAuditEvents(req: Request, res: Response): Promise<void> {
+    try {
+        const rawOffset = req.query.offset;
+        const offset = typeof rawOffset === 'string' ? Number(rawOffset.trim()) : 0;
+        if (!Number.isInteger(offset) || offset < 0) {
+            res.status(400).json({ error: 'Invalid offset' });
+            return;
+        }
+        const db = getDB();
+        const rows = await db.all(
+            `SELECT * FROM audit_events ORDER BY created_at DESC LIMIT 50 OFFSET ?`,
+            [offset]
+        );
+        res.json({ data: rows });
+        return;
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server failed. Please try again.' });
+        return;
+    }
+}
+
+/**
  * GET /api/admin/users
  * List all users.
  */
