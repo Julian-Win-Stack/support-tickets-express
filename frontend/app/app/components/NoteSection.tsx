@@ -53,7 +53,7 @@ export function NoteSection({ selectedTicket }: { selectedTicket: Ticket | null 
 
   return (
     user && user.role === 'admin' && selectedTicket && (
-    <div className="bg-[#121a2a] border border-[#1e2a44] rounded-[12px] p-4 max-w-[920px]">
+    <div className="bg-[#121a2a] border border-[#1e2a44] rounded-[12px] p-3 sm:p-4 max-w-[920px]">
       <h3 className="m-0 text-base font-medium text-[#e8eefc] mb-3">
         Internal notes (admin only)
       </h3>
@@ -87,7 +87,7 @@ export function NoteSection({ selectedTicket }: { selectedTicket: Ticket | null 
           key={`${note.created_at}-${i}`}
           className="rounded-[10px] border border-[#1e2a44] bg-[#0f1524] p-3 mb-2"
         >
-          <div className="flex justify-between items-start gap-2 mb-1.5">
+          <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-start gap-1 sm:gap-2 mb-1.5">
             <span className="font-semibold text-[#e8eefc]">{note.name}</span>
             <span className="text-sm text-[#98a7cf] shrink-0">{note.created_at}</span>
           </div>

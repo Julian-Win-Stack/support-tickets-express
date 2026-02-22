@@ -16,7 +16,7 @@ export default function GoToTopButton() {
       type="button"
       onClick={scrollToTop}
       aria-label="Go back to top"
-      className="fixed right-5 top-1/2 -translate-y-1/2 z-50 min-w-[56px] min-h-[56px] px-3 py-2.5 flex flex-col items-center justify-center gap-0.5 rounded-xl border border-[#4a5c82] bg-[#1c2a47]/95 text-[#c8d4e8] text-xs font-medium leading-snug hover:brightness-110 hover:border-[#5a6c92] transition-all shadow-md"
+      className="fixed right-2 sm:right-5 top-1/2 -translate-y-1/2 z-50 min-w-[48px] min-h-[48px] sm:min-w-[56px] sm:min-h-[56px] px-2 py-2 sm:px-3 sm:py-2.5 flex flex-col items-center justify-center gap-0.5 rounded-lg sm:rounded-xl border border-[#4a5c82] bg-[#1c2a47]/95 text-[10px] sm:text-xs font-medium leading-snug hover:brightness-110 hover:border-[#5a6c92] transition-all shadow-md"
     >
       <span className="whitespace-nowrap">Go back</span>
       <span className="whitespace-nowrap">to top</span>

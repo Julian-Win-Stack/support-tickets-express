@@ -176,17 +176,17 @@ export default function AuditPage() {
     ACTION_LABELS[action] ?? action.replace(/_/g, ' ');
 
   return (
-    <main className="max-w-[1200px] mx-auto px-4 py-6">
+    <main className="max-w-[1200px] mx-auto px-3 sm:px-4 py-4 sm:py-6">
       <div className="w-full max-w-[720px] mx-auto">
-        <h1 className="text-2xl font-semibold text-[#e8eefc] m-0 mb-6">
+        <h1 className="text-xl sm:text-2xl font-semibold text-[#e8eefc] m-0 mb-4 sm:mb-6">
           Audit Log
         </h1>
 
-        <div className="flex flex-wrap items-center gap-3 mb-6 p-3 rounded-xl border border-[#4a5c82]">
+        <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 sm:gap-3 mb-4 sm:mb-6 p-3 rounded-xl border border-[#4a5c82]">
           <select
             value={actionFilter}
             onChange={(e) => setActionFilter(e.target.value)}
-            className="bg-transparent border border-[#4a5c82] rounded-lg py-2 px-3 text-sm text-[#e8eefc] focus:outline-none focus:ring-1 focus:ring-[#4a6cf7]/50 focus:border-[#4a6cf7]/50 appearance-none cursor-pointer min-w-[140px]"
+            className="bg-transparent border border-[#4a5c82] rounded-lg py-2 px-3 text-sm text-[#e8eefc] focus:outline-none focus:ring-1 focus:ring-[#4a6cf7]/50 focus:border-[#4a6cf7]/50 appearance-none cursor-pointer w-full sm:w-auto min-w-0 sm:min-w-[140px]"
             style={{
               backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23c8d4e8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E")`,
               backgroundRepeat: 'no-repeat',
@@ -204,7 +204,7 @@ export default function AuditPage() {
           <select
             value={entityFilter}
             onChange={(e) => setEntityFilter(e.target.value)}
-            className="bg-transparent border border-[#4a5c82] rounded-lg py-2 px-3 text-sm text-[#e8eefc] focus:outline-none focus:ring-1 focus:ring-[#4a6cf7]/50 focus:border-[#4a6cf7]/50 appearance-none cursor-pointer min-w-[120px]"
+            className="bg-transparent border border-[#4a5c82] rounded-lg py-2 px-3 text-sm text-[#e8eefc] focus:outline-none focus:ring-1 focus:ring-[#4a6cf7]/50 focus:border-[#4a6cf7]/50 appearance-none cursor-pointer w-full sm:w-auto min-w-0 sm:min-w-[120px]"
             style={{
               backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23c8d4e8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E")`,
               backgroundRepeat: 'no-repeat',
@@ -224,7 +224,7 @@ export default function AuditPage() {
             value={actorSearch}
             onChange={(e) => setActorSearch(e.target.value)}
             placeholder="search by the actor"
-            className="bg-transparent border border-[#4a5c82] rounded-lg py-2 px-3 text-sm text-[#e8eefc] placeholder:text-[#8a9ab8] focus:outline-none focus:ring-1 focus:ring-[#4a6cf7]/50 focus:border-[#4a6cf7]/50 min-w-[180px] flex-1"
+            className="bg-transparent border border-[#4a5c82] rounded-lg py-2 px-3 text-sm text-[#e8eefc] placeholder:text-[#8a9ab8] focus:outline-none focus:ring-1 focus:ring-[#4a6cf7]/50 focus:border-[#4a6cf7]/50 w-full sm:min-w-[180px] sm:flex-1"
           />
           <button
             type="button"

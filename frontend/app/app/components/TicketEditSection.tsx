@@ -52,12 +52,12 @@ export function TicketEditSection({ selectedTicket, updateTicket, refreshTickets
 
   return (
     selectedTicket && (
-    <div className="bg-[#121a2a] border border-[#1e2a44] rounded-[12px] p-4 max-w-[920px]">
-      <h2 className="m-0 text-xl font-semibold text-[#e8eefc] mb-3">
+    <div className="bg-[#121a2a] border border-[#1e2a44] rounded-[12px] p-3 sm:p-4 max-w-[920px]">
+      <h2 className="m-0 text-lg sm:text-xl font-semibold text-[#e8eefc] mb-3">
         Ticket Detail
       </h2>
 
-      <div className="flex flex-wrap justify-between items-start gap-3 mb-4">
+      <div className="flex flex-col sm:flex-row flex-wrap justify-between items-stretch sm:items-start gap-3 mb-4">
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-mono text-lg font-bold text-[#e8eefc]">
@@ -69,14 +69,14 @@ export function TicketEditSection({ selectedTicket, updateTicket, refreshTickets
             Updated: {selectedTicket.updated_at}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2">
           {user?.role === "admin" && (
             <>
               <select
                 id="assign-ticket"
                 value={selectedAdminId ? selectedAdminId : ""}
                 onChange={(e) => setSelectedAdminId(Number(e.target.value))}
-                className="text-sm py-1.5 px-2.5 rounded-[8px] border border-[#263557] bg-[#0f1524] text-[#e8eefc] outline-none min-w-[120px]"
+                className="text-sm py-1.5 px-2.5 rounded-[8px] border border-[#263557] bg-[#0f1524] text-[#e8eefc] outline-none w-full sm:w-auto min-w-0 sm:min-w-[120px]"
               >
                 <option value="">Unassigned</option>
                 {admins.length > 0 && admins.map((admin) => (

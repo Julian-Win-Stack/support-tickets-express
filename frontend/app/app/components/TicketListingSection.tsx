@@ -34,9 +34,9 @@ export function TicketListingSection({
   const { user } = useAuth();
 
   return (
-    <div className="bg-[#121a2a] border border-[#1e2a44] rounded-[12px] p-4">
-      <div className="flex justify-between items-center gap-3 mb-3">
-        <h2 className="m-0 text-xl font-semibold text-[#e8eefc]">
+    <div className="bg-[#121a2a] border border-[#1e2a44] rounded-[12px] p-3 sm:p-4">
+      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 mb-3">
+        <h2 className="m-0 text-lg sm:text-xl font-semibold text-[#e8eefc]">
           Tickets
         </h2>
         {user?.role === 'admin' &&
@@ -46,7 +46,7 @@ export function TicketListingSection({
           onChange={(e) => {
             setAssignment(e.target.value)
           }}
-          className="text-sm py-1.5 px-2.5 rounded-[8px] border border-[#263557] bg-[#0f1524] text-[#e8eefc] outline-none min-w-[160px]"
+          className="text-sm py-1.5 px-2.5 rounded-[8px] border border-[#263557] bg-[#0f1524] text-[#e8eefc] outline-none w-full sm:w-auto min-w-0 sm:min-w-[160px]"
         >
           <option value="">Ticket Assignment</option>
           <option 
@@ -63,8 +63,8 @@ export function TicketListingSection({
         }
       </div>
 
-      <div className="flex flex-wrap items-end gap-3 mb-3">
-        <div className="flex flex-col gap-1.5 min-w-[100px]">
+      <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-end gap-3 mb-3">
+        <div className="flex flex-col gap-1.5 w-full sm:w-auto sm:min-w-[100px]">
           <label htmlFor="filter-status" className={labelClass}>
             Status
           </label>
@@ -80,7 +80,7 @@ export function TicketListingSection({
             <option value="resolved">resolved</option>
           </select>
         </div>
-        <div className="flex flex-col gap-1.5 flex-1 min-w-[140px]">
+        <div className="flex flex-col gap-1.5 flex-1 min-w-0 sm:min-w-[140px]">
           <label htmlFor="filter-search" className={labelClass}>
             Search
           </label>
@@ -110,10 +110,10 @@ export function TicketListingSection({
         {tickets.length > 0 ? tickets.map((ticket) => (
           <article
             key={ticket.id}
-            className="p-4 border border-[#243353] rounded-[10px] bg-[#0f1524]"
+            className="p-3 sm:p-4 border border-[#243353] rounded-[10px] bg-[#0f1524]"
           >
-            <div className="flex justify-between items-start gap-2">
-              <div className="flex flex-wrap gap-2 items-baseline">
+            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-start gap-2">
+              <div className="flex flex-wrap gap-2 items-baseline min-w-0">
                 <span className="font-mono text-sm font-bold text-[#e8eefc]">
                   #{ticket.id}
                 </span>

@@ -42,10 +42,10 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="max-w-[1200px] mx-auto px-4 py-6">
-      <div className="w-full max-w-[720px] mx-auto mt-6 md:mt-12 grid gap-4">
+    <main className="max-w-[1200px] mx-auto px-3 sm:px-4 py-4 sm:py-6">
+      <div className="w-full max-w-[720px] mx-auto mt-4 sm:mt-6 md:mt-12 grid gap-4">
         {/* Register card - matches .card + #auth-card */}
-        <div className="bg-[#121a2a] border border-[#1e2a44] rounded-[12px] p-4">
+        <div className="bg-[#121a2a] border border-[#1e2a44] rounded-[12px] p-3 sm:p-4">
           <form className="grid gap-2.5 mt-2.5"
           onSubmit={handleRegister}
           >
@@ -118,7 +118,7 @@ export default function LoginPage() {
         </div>
 
         {/* Login card - matches .card */}
-        <div className="bg-[#121a2a] border border-[#1e2a44] rounded-[12px] p-4">
+        <div className="bg-[#121a2a] border border-[#1e2a44] rounded-[12px] p-3 sm:p-4">
           <form className="grid gap-2.5 mt-2.5"
           onSubmit={handleLogin}>
             <h2 className="m-0 text-base font-medium text-[#e8eefc] mb-3">

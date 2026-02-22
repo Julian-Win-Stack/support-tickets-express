@@ -35,7 +35,7 @@ export function Toast({ toast, onRemove }: ToastProps) {
       <Link
         href="/notifications"
         onClick={onRemove}
-        className="block rounded-[12px] border border-[#0e7490] bg-[#1c2a47] p-4 min-w-[280px] max-w-[400px] shadow-lg transition-opacity duration-300 cursor-pointer hover:brightness-110 no-underline"
+        className="block rounded-[12px] border border-[#0e7490] bg-[#1c2a47] p-3 sm:p-4 min-w-[260px] sm:min-w-[280px] max-w-[min(400px,calc(100vw-2rem))] shadow-lg transition-opacity duration-300 cursor-pointer hover:brightness-110 no-underline"
         role="alert"
       >
         <h4 className="m-0 text-sm font-semibold text-[#e8eefc]">{toast.subject}</h4>

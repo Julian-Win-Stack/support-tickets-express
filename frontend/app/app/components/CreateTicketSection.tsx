@@ -34,7 +34,7 @@ export function CreateTicketSection({ refreshTickets }: { refreshTickets: () => 
   }
 
   return (
-    <div className="bg-[#121a2a] border border-[#1e2a44] rounded-[12px] p-4">
+    <div className="bg-[#121a2a] border border-[#1e2a44] rounded-[12px] p-3 sm:p-4">
       <form className="flex flex-col gap-2.5" onSubmit={handleCreateTicket}>
         <h2 className="m-0 text-base font-medium text-[#e8eefc] mb-1">
           Create Ticket

@@ -59,8 +59,8 @@ export default function HomePage() {
   }, [selectedTicketId]);
 
   return (
-    <main className="max-w-[1200px] mx-auto px-4 py-4">
-      <div className="w-full max-w-[920px] mx-auto flex flex-col gap-6">
+    <main className="max-w-[1200px] mx-auto px-3 sm:px-4 py-3 sm:py-4">
+      <div className="w-full max-w-[920px] mx-auto flex flex-col gap-4 sm:gap-6">
         <CreateTicketSection refreshTickets={refreshTickets} />
         <TicketListingSection
           tickets={tickets}

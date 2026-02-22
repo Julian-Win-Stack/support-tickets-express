@@ -57,20 +57,20 @@ export default function NotificationsPage() {
   };
 
   return (
-    <main className="max-w-[1200px] mx-auto px-4 py-6">
+    <main className="max-w-[1200px] mx-auto px-3 sm:px-4 py-4 sm:py-6">
       <div className="w-full max-w-[720px] mx-auto">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 mb-4 sm:mb-6">
           <button
             type="button"
             onClick={handleMarkAllRead}
-            className="py-2 px-4 rounded-[10px] border border-[#2a3b62] bg-[#1c2a47] text-[#e8eefc] text-sm font-medium cursor-pointer hover:brightness-110 transition-[filter]"
+            className="py-2 px-4 rounded-[10px] border border-[#2a3b62] bg-[#1c2a47] text-[#e8eefc] text-sm font-medium cursor-pointer hover:brightness-110 transition-[filter] order-2 sm:order-1"
           >
             Mark all read
           </button>
-          <h1 className="text-2xl font-semibold text-[#e8eefc] m-0">
+          <h1 className="text-xl sm:text-2xl font-semibold text-[#e8eefc] m-0 order-1 sm:order-2">
             Notifications
           </h1>
-          <div className="w-[100px]" />
+          <div className="hidden sm:block w-[100px] order-3" />
         </div>
 
         <div className="flex flex-col gap-3">
