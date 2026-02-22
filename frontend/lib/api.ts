@@ -1,5 +1,11 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
+function handleUnauthorized(res: Response): void {
+  if (res.status === 401 && typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("auth:401"));
+  }
+}
+
 function formatRateLimitMessage(data: { retryAfterSeconds?: number }): string {
   if (data.retryAfterSeconds == null) {
     return "Too many attempts. Please try again later.";
@@ -17,6 +23,7 @@ export async function login(loginEmail: string, loginPassword: string) {
   });
   const data = await res.json();
   if (!res.ok) {
+    handleUnauthorized(res);
     if (res.status === 429) throw new Error(formatRateLimitMessage(data));
     throw new Error(data.error || "Login failed");
   }
@@ -26,7 +33,11 @@ export async function login(loginEmail: string, loginPassword: string) {
 export async function me() {
   const res = await fetch(`${API_URL}/api/auth/me`, { credentials: "include" });
   const data = await res.json();
-  return data; // { ok, name, role } or { ok: false }
+  if (!res.ok) {
+    handleUnauthorized(res);
+    throw new Error(data.error || "Failed to get user");
+  }
+  return data;
 }
 
 export async function logout() {
@@ -35,7 +46,10 @@ export async function logout() {
     credentials: "include",
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Logout failed");
+  if (!res.ok) {
+    handleUnauthorized(res);
+    throw new Error(data.error || "Logout failed");
+  }
   return data;
 }
 
@@ -56,6 +70,7 @@ export async function register(
   });
   const data = await res.json();
   if (!res.ok) {
+    handleUnauthorized(res);
     if (res.status === 429) throw new Error(formatRateLimitMessage(data));
     throw new Error(data.error || "Registration failed");
   }
@@ -71,6 +86,7 @@ export async function createTicket(title: string, body: string) {
   });
   const data = await res.json();
   if (!res.ok) {
+    handleUnauthorized(res);
     if (res.status === 429) throw new Error(formatRateLimitMessage(data));
     throw new Error(data.error || "Ticket creation failed");
   }
@@ -93,21 +109,30 @@ export async function getTickets(status?: string, search?: string, admin_view_co
   const finalQueryString = queryParams.length > 1 ? `?${queryParams.join('&')}` : queryParams.length === 1 ? `?${queryParams[0]}` : '';
   const res = await fetch(`${API_URL}/api/ticket${finalQueryString}`, { credentials: "include" });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Failed to get tickets");
+  if (!res.ok) {
+    handleUnauthorized(res);
+    throw new Error(data.error || "Failed to get tickets");
+  }
   return data;
 }
 
 export async function getTicketById(ticketId: number) {
   const res = await fetch(`${API_URL}/api/ticket/${ticketId}`, { credentials: "include" });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Failed to get ticket");
+  if (!res.ok) {
+    handleUnauthorized(res);
+    throw new Error(data.error || "Failed to get ticket");
+  }
   return data;
 }
 
 export async function getAdmins() {
   const res = await fetch(`${API_URL}/api/admin/users`, { credentials: "include" });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Failed to get admins");
+  if (!res.ok) {
+    handleUnauthorized(res);
+    throw new Error(data.error || "Failed to get admins");
+  }
   return data;
 }
 
@@ -123,7 +148,10 @@ export async function getAuditEvents(
     credentials: "include",
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Failed to get audit events");
+  if (!res.ok) {
+    handleUnauthorized(res);
+    throw new Error(data.error || "Failed to get audit events");
+  }
   return data;
 }
 
@@ -136,8 +164,10 @@ export async function assignTicket(ticketId: number, assignedAdminId: number | n
     body: JSON.stringify({ assigned_admin_id }),
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Failed to assign ticket");
-  console.log('ticket assigned. data', data);
+  if (!res.ok) {
+    handleUnauthorized(res);
+    throw new Error(data.error || "Failed to assign ticket");
+  }
   return data;
 }
 
@@ -149,14 +179,20 @@ export async function updateTicket(ticketId: number, title: string = "", body: s
     body: JSON.stringify({ title, body, status }),
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Failed to update ticket");
+  if (!res.ok) {
+    handleUnauthorized(res);
+    throw new Error(data.error || "Failed to update ticket");
+  }
   return data;
 }
 
 export async function getNotes(ticketId: number) {
   const res = await fetch(`${API_URL}/api/notes/${ticketId}`, { credentials: "include" });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Failed to get notes");
+  if (!res.ok) {
+    handleUnauthorized(res);
+    throw new Error(data.error || "Failed to get notes");
+  }
   return data;
 }
 
@@ -168,7 +204,10 @@ export async function createNote(ticketId: number, body: string) {
     body: JSON.stringify({ body }),
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Failed to create note");
+  if (!res.ok) {
+    handleUnauthorized(res);
+    throw new Error(data.error || "Failed to create note");
+  }
   return data;
 }
 
@@ -176,7 +215,10 @@ export async function createNote(ticketId: number, body: string) {
 export async function getMyNotifications() {
   const res = await fetch(`${API_URL}/api/notifications`, { credentials: "include" });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Failed to get notifications");
+  if (!res.ok) {
+    handleUnauthorized(res);
+    throw new Error(data.error || "Failed to get notifications");
+  }
   return data;
 }
 
@@ -184,7 +226,10 @@ export async function getMyNotifications() {
 export async function getUnreadNotificationCount() {
   const res = await fetch(`${API_URL}/api/notifications/unread-count`, { credentials: "include", cache: "no-store" });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Failed to get unread notification count");
+  if (!res.ok) {
+    handleUnauthorized(res);
+    throw new Error(data.error || "Failed to get unread notification count");
+  }
   return data;
 }
 
@@ -194,7 +239,10 @@ export async function markOneNotificationRead(notificationId: number) {
     credentials: "include",
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Failed to mark notification as read");
+  if (!res.ok) {
+    handleUnauthorized(res);
+    throw new Error(data.error || "Failed to mark notification as read");
+  }
   return data;
 }
 
@@ -204,7 +252,10 @@ export async function unReadOneNotification(notificationId: number) {
     credentials: "include",
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Failed to mark notification as unread");
+  if (!res.ok) {
+    handleUnauthorized(res);
+    throw new Error(data.error || "Failed to mark notification as unread");
+  }
   return data;
 }
 
@@ -215,7 +266,10 @@ export async function markAllNotificationsRead() {
     credentials: "include",
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Failed to mark all notifications as read");
+  if (!res.ok) {
+    handleUnauthorized(res);
+    throw new Error(data.error || "Failed to mark all notifications as read");
+  }
   return data;
 }
 

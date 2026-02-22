@@ -8,19 +8,44 @@ import {
     useCallback,
     type ReactNode,
 } from 'react';
+import { useRouter } from 'next/navigation';
 
 import { login as apiLogin, logout as apiLogout, register as apiRegister, me } from "@/lib/api";
 import type { AuthUser, AuthContextValue } from "@/types";
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+function clearSessionState(
+    setUser: (u: AuthUser | null) => void,
+    setLoginError: (e: string | null) => void,
+    setRegisterError: (e: string | null) => void,
+    setLoginSuccessMessage: (m: string | null) => void,
+    setRegisterSuccessMessage: (m: string | null) => void,
+) {
+    setUser(null);
+    setLoginError(null);
+    setRegisterError(null);
+    setLoginSuccessMessage(null);
+    setRegisterSuccessMessage(null);
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
+    const router = useRouter();
     const [user, setUser] = useState<AuthUser | null>(null);
     const [loading, setLoading] = useState(true);
     const [loginError, setLoginError] = useState<string | null>(null);
     const [registerError, setRegisterError] = useState<string | null>(null);
     const [loginSuccessMessage, setLoginSuccessMessage] = useState<string | null>(null);
     const [registerSuccessMessage, setRegisterSuccessMessage] = useState<string | null>(null);
+
+    useEffect(() => {
+        const handle401 = () => {
+            clearSessionState(setUser, setLoginError, setRegisterError, setLoginSuccessMessage, setRegisterSuccessMessage);
+            router.push("/login");
+        };
+        window.addEventListener("auth:401", handle401);
+        return () => window.removeEventListener("auth:401", handle401);
+    }, [router]);
 
     useEffect(() => {
         me()
