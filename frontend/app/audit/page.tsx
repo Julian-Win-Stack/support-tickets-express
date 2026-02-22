@@ -3,7 +3,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
-import { getAuditEvents } from '@/lib/api';
+import { getAuditEvents, getAdmins } from '@/lib/api';
 
 const ACTION_OPTIONS: { value: string; label: string }[] = [
   { value: '', label: 'Action' },
@@ -83,6 +83,23 @@ function getEntityLabel(event: AuditEvent): string {
   return `${event.entity_type} #${event.entity_id}`;
 }
 
+type Admin = { id: number; name: string; email: string };
+
+function formatAssignmentValue(
+  rawValue: string | null,
+  admins: Admin[]
+): string {
+  if (rawValue == null) return 'Unassigned';
+  try {
+    const id = JSON.parse(rawValue) as number | null;
+    if (id == null) return 'Unassigned';
+    const admin = admins.find((a) => a.id === id);
+    return admin ? `${admin.name} (${admin.email})` : `Admin #${id}`;
+  } catch {
+    return rawValue;
+  }
+}
+
 export default function AuditPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -93,12 +110,20 @@ export default function AuditPage() {
   const [actionFilter, setActionFilter] = useState('');
   const [entityFilter, setEntityFilter] = useState('');
   const [actorSearch, setActorSearch] = useState('');
+  const [admins, setAdmins] = useState<Admin[]>([]);
 
   useEffect(() => {
     if (!user && !loading) {
       router.replace('/login');
     }
   }, [user, loading]);
+
+  useEffect(() => {
+    if (!user) return;
+    getAdmins()
+      .then((res) => setAdmins((res.data ?? []) as Admin[]))
+      .catch(() => setAdmins([]));
+  }, [user]);
 
   const fetchEvents = useCallback(
     (offsetVal: number, append: boolean) => {
@@ -258,9 +283,19 @@ export default function AuditPage() {
                       event.action !== 'user_logged_in' &&
                       event.action !== 'user_logged_out' && (
                         <p className="m-0 text-sm text-[#aab6d6]">
-                          <span className="text-[#e8eefc]">{event.before}</span>
+                          <span className="text-[#e8eefc]">
+                            {(event.action === 'ticket_assigned' ||
+                              event.action === 'ticket_unassigned')
+                              ? formatAssignmentValue(event.before, admins)
+                              : event.before}
+                          </span>
                           <span className="text-[#5a6478] mx-1">→</span>
-                          <span className="text-[#e8eefc]">{event.after}</span>
+                          <span className="text-[#e8eefc]">
+                            {(event.action === 'ticket_assigned' ||
+                              event.action === 'ticket_unassigned')
+                              ? formatAssignmentValue(event.after, admins)
+                              : event.after}
+                          </span>
                         </p>
                       )}
                     {event.before == null &&
@@ -268,7 +303,10 @@ export default function AuditPage() {
                       event.action !== 'user_logged_in' &&
                       event.action !== 'user_logged_out' && (
                         <p className="m-0 text-sm text-[#aab6d6]">
-                          {event.after}
+                          {(event.action === 'ticket_assigned' ||
+                            event.action === 'ticket_unassigned')
+                            ? formatAssignmentValue(event.after, admins)
+                            : event.after}
                         </p>
                       )}
                   </article>
