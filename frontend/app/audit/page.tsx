@@ -2,8 +2,29 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { getAuditEvents } from '@/lib/api';
+
+const ACTION_OPTIONS: { value: string; label: string }[] = [
+  { value: '', label: 'Action' },
+  { value: 'ticket_created', label: 'Ticket created' },
+  { value: 'ticket_status_updated', label: 'Status changed' },
+  { value: 'ticket_assigned', label: 'Ticket assigned' },
+  { value: 'ticket_unassigned', label: 'Ticket unassigned' },
+  { value: 'ticket_title_body_updated', label: 'Updated ticket' },
+  { value: 'note_created', label: 'Note created' },
+  { value: 'user_logged_in', label: 'Logged in' },
+  { value: 'user_logged_out', label: 'Logged out' },
+  { value: 'user_registered', label: 'Registered' },
+  { value: 'escalated_ticket', label: 'Escalation' },
+];
+
+const ENTITY_OPTIONS: { value: string; label: string }[] = [
+  { value: '', label: 'Entity' },
+  { value: 'ticket', label: 'Ticket' },
+  { value: 'notes', label: 'Note' },
+  { value: 'user', label: 'Auth' },
+];
 
 type AuditEvent = {
   id: number;
@@ -69,6 +90,9 @@ export default function AuditPage() {
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [loadingEvents, setLoadingEvents] = useState(true);
+  const [actionFilter, setActionFilter] = useState('');
+  const [entityFilter, setEntityFilter] = useState('');
+  const [actorSearch, setActorSearch] = useState('');
 
   useEffect(() => {
     if (!user && !loading) {
@@ -76,38 +100,51 @@ export default function AuditPage() {
     }
   }, [user, loading]);
 
+  const fetchEvents = useCallback(
+    (offsetVal: number, append: boolean) => {
+      const filters = {
+        action: actionFilter || undefined,
+        entity_type: entityFilter || undefined,
+        search: actorSearch.trim() || undefined,
+      };
+      setLoadingEvents(true);
+      getAuditEvents(offsetVal, filters)
+        .then((res) => {
+          const data = (res.data ?? []) as AuditEvent[];
+          if (append) {
+            setEvents((prev) => [...prev, ...data]);
+            setOffset((prev) => prev + data.length);
+          } else {
+            setEvents(data);
+            setOffset(data.length);
+          }
+          setHasMore(data.length === 50);
+        })
+        .catch((error) => {
+          console.error(error);
+          setHasMore(false);
+          if (!append) setEvents([]);
+        })
+        .finally(() => setLoadingEvents(false));
+    },
+    [actionFilter, entityFilter, actorSearch]
+  );
+
   useEffect(() => {
     if (!user) return;
-    setLoadingEvents(true);
-    getAuditEvents(0)
-      .then((res) => {
-        const data = (res.data ?? []) as AuditEvent[];
-        setEvents(data);
-        setHasMore(data.length === 50);
-        setOffset(data.length);
-      })
-      .catch((error) => {
-        console.error(error);
-        setHasMore(false);
-      })
-      .finally(() => setLoadingEvents(false));
-  }, [user]);
+    const timer = setTimeout(() => fetchEvents(0, false), 200);
+    return () => clearTimeout(timer);
+  }, [user, actionFilter, entityFilter, actorSearch, fetchEvents]);
 
   function handleLoadMore() {
     if (!hasMore || loadingEvents) return;
-    setLoadingEvents(true);
-    getAuditEvents(offset)
-      .then((res) => {
-        const data = (res.data ?? []) as AuditEvent[];
-        setEvents((prev) => [...prev, ...data]);
-        setHasMore(data.length === 50);
-        setOffset((prev) => prev + data.length);
-      })
-      .catch((error) => {
-        console.error(error);
-        setHasMore(false);
-      })
-      .finally(() => setLoadingEvents(false));
+    fetchEvents(offset, true);
+  }
+
+  function handleClearFilters() {
+    setActionFilter('');
+    setEntityFilter('');
+    setActorSearch('');
   }
 
   const actionLabel = (action: string) =>
@@ -119,6 +156,59 @@ export default function AuditPage() {
         <h1 className="text-2xl font-semibold text-[#e8eefc] m-0 mb-6">
           Audit Log
         </h1>
+
+        <div className="flex flex-wrap items-center gap-3 mb-6 p-3 rounded-xl border border-[#4a5c82]">
+          <select
+            value={actionFilter}
+            onChange={(e) => setActionFilter(e.target.value)}
+            className="bg-transparent border border-[#4a5c82] rounded-lg py-2 px-3 text-sm text-[#e8eefc] focus:outline-none focus:ring-1 focus:ring-[#4a6cf7]/50 focus:border-[#4a6cf7]/50 appearance-none cursor-pointer min-w-[140px]"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23c8d4e8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E")`,
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'right 0.5rem center',
+              backgroundSize: '1rem',
+              paddingRight: '2rem',
+            }}
+          >
+            {ACTION_OPTIONS.map((opt) => (
+              <option key={opt.value || 'all'} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          <select
+            value={entityFilter}
+            onChange={(e) => setEntityFilter(e.target.value)}
+            className="bg-transparent border border-[#4a5c82] rounded-lg py-2 px-3 text-sm text-[#e8eefc] focus:outline-none focus:ring-1 focus:ring-[#4a6cf7]/50 focus:border-[#4a6cf7]/50 appearance-none cursor-pointer min-w-[120px]"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23c8d4e8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E")`,
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'right 0.5rem center',
+              backgroundSize: '1rem',
+              paddingRight: '2rem',
+            }}
+          >
+            {ENTITY_OPTIONS.map((opt) => (
+              <option key={opt.value || 'all'} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          <input
+            type="text"
+            value={actorSearch}
+            onChange={(e) => setActorSearch(e.target.value)}
+            placeholder="search by the actor"
+            className="bg-transparent border border-[#4a5c82] rounded-lg py-2 px-3 text-sm text-[#e8eefc] placeholder:text-[#8a9ab8] focus:outline-none focus:ring-1 focus:ring-[#4a6cf7]/50 focus:border-[#4a6cf7]/50 min-w-[180px] flex-1"
+          />
+          <button
+            type="button"
+            onClick={handleClearFilters}
+            className="bg-transparent border border-[#4a5c82] rounded-lg py-2 px-4 text-sm text-[#c8d4e8] hover:text-[#e8eefc] hover:border-[#5a6c92] focus:outline-none focus:ring-1 focus:ring-[#4a6cf7]/50 transition-colors"
+          >
+            Clear
+          </button>
+        </div>
 
         {loadingEvents && events.length === 0 ? (
           <p className="text-[#aab6d6]">Loading...</p>

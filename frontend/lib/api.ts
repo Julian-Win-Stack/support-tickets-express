@@ -94,8 +94,17 @@ export async function getAdmins() {
   return data;
 }
 
-export async function getAuditEvents(offset: number = 0) {
-  const res = await fetch(`${API_URL}/api/admin/audit-events?offset=${offset}`, { credentials: "include" });
+export async function getAuditEvents(
+  offset: number = 0,
+  filters?: { action?: string; entity_type?: string; search?: string }
+) {
+  const params = new URLSearchParams({ offset: String(offset) });
+  if (filters?.action) params.set("action", filters.action);
+  if (filters?.entity_type) params.set("entity_type", filters.entity_type);
+  if (filters?.search) params.set("search", filters.search);
+  const res = await fetch(`${API_URL}/api/admin/audit-events?${params}`, {
+    credentials: "include",
+  });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to get audit events");
   return data;
