@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import Link from 'next/link';
 
 export type ToastItem = {
   subject: string;
@@ -31,15 +32,17 @@ export function Toast({ toast, onRemove }: ToastProps) {
       className="fixed top-4 left-1/2 z-50 -translate-x-1/2"
       aria-live="polite"
     >
-      <div
-        className="rounded-[12px] border border-[#0e7490] bg-[#1c2a47] p-4 min-w-[280px] max-w-[400px] shadow-lg transition-opacity duration-300"
+      <Link
+        href="/notifications"
+        onClick={onRemove}
+        className="block rounded-[12px] border border-[#0e7490] bg-[#1c2a47] p-4 min-w-[280px] max-w-[400px] shadow-lg transition-opacity duration-300 cursor-pointer hover:brightness-110 no-underline"
         role="alert"
       >
         <h4 className="m-0 text-sm font-semibold text-[#e8eefc]">{toast.subject}</h4>
         {toast.message && (
           <p className="m-0 mt-1 text-xs text-[#aab6d6]">{toast.message}</p>
         )}
-      </div>
+      </Link>
     </div>
   );
 }
