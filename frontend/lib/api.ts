@@ -94,6 +94,13 @@ export async function getAdmins() {
   return data;
 }
 
+export async function getAuditEvents(offset: number = 0) {
+  const res = await fetch(`${API_URL}/api/admin/audit-events?offset=${offset}`, { credentials: "include" });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to get audit events");
+  return data;
+}
+
 export async function assignTicket(ticketId: number, assignedAdminId: number | null) {
   const assigned_admin_id = assignedAdminId ?? null;
   const res = await fetch(`${API_URL}/api/ticket/${ticketId}/assign`, {
