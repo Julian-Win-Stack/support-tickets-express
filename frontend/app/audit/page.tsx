@@ -1,5 +1,9 @@
 'use client';
 
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+
 /** Mock data for UI only - will be replaced with real data later */
 const MOCK_AUDIT_EVENTS = [
   {
@@ -56,6 +60,15 @@ function formatAuditDate(dateStr: string) {
 }
 
 export default function AuditPage() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!user && !loading) {
+      router.replace('/login');
+    }
+  }, [user, loading]);
+
   return (
     <main className="max-w-[1200px] mx-auto px-4 py-6">
       <div className="w-full max-w-[720px] mx-auto">

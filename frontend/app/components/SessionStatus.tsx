@@ -14,7 +14,7 @@ const SessionStatus = () => {
     router.push('/login');
   }
 
-  const isOnNotificationsPage = pathname === '/notifications';
+  const showBackToTickets = pathname === '/notifications' || pathname === '/audit';
 
   return (
     <div className="flex flex-col gap-2">
@@ -33,7 +33,7 @@ const SessionStatus = () => {
           >
             Logout
           </button>
-          {isOnNotificationsPage && (
+          {showBackToTickets && (
             <Link
               href="/app"
               className="text-sm py-2 px-4 rounded-[8px] border border-[#0e7490] bg-[#1c2a47] text-center w-[140px] cursor-pointer hover:brightness-110 transition-[filter] no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0e7490] focus-visible:ring-offset-2 focus-visible:ring-offset-[#12121C]"
@@ -41,6 +41,12 @@ const SessionStatus = () => {
               <span className="text-[#e8eefc]">Back to tickets</span>
             </Link>
           )}
+          <Link
+            href="/audit"
+            className="text-sm py-2 px-4 rounded-[8px] border border-[#0e7490] bg-[#1c2a47] text-center w-[140px] cursor-pointer hover:brightness-110 transition-[filter] no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0e7490] focus-visible:ring-offset-2 focus-visible:ring-offset-[#12121C]"
+          >
+            <span className="text-[#e8eefc]">Audit Logs</span>
+          </Link>
         </div>
         </div>
       )}

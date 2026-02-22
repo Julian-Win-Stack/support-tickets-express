@@ -61,7 +61,11 @@ export async function listAuditEvents(req: Request, res: Response): Promise<void
         }
         const db = getDB();
         const rows = await db.all(
-            `SELECT * FROM audit_events ORDER BY created_at DESC LIMIT 50 OFFSET ?`,
+            `SELECT a.id, a.actor_user_id, a.action, a.entity_type, a.entity_id, a.before, a.after, a.created_at,
+             u.name AS actor_name, u.email AS actor_email, u.role AS actor_role
+             FROM audit_events a
+             LEFT JOIN users u ON a.actor_user_id = u.id
+             ORDER BY a.created_at DESC LIMIT 50 OFFSET ?`,
             [offset]
         );
         res.json({ data: rows });
