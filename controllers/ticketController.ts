@@ -277,6 +277,12 @@ export async function updateTicketsTitle_Body_Status(req: Request, res: Response
             const oldStatus = existingTicket.status;
             const ticketOwnerId = existingTicket.user_id;
 
+            if (oldStatus === cleanStatus) {
+                const currentTicket = await db.get(`SELECT * FROM tickets WHERE id = ?`, [ticketId]);
+                res.json({ ok: true, data: currentTicket });
+                return;
+            }
+
             await db.run(
                 `UPDATE tickets
                 SET status = ?,
@@ -321,6 +327,12 @@ export async function updateTicketsTitle_Body_Status(req: Request, res: Response
 
             const oldTitle = existingTicket.title;
             const oldBody = existingTicket.body;
+
+            if (oldTitle === cleanTitle && oldBody === cleanBody) {
+                const currentTicket = await db.get(`SELECT * FROM tickets WHERE id = ? AND user_id = ?`, [ticketId, userId]);
+                res.json({ ok: true, data: currentTicket });
+                return;
+            }
 
             await db.run(
                 `UPDATE tickets 
@@ -406,7 +418,8 @@ export async function assignTicket(req: Request, res: Response): Promise<void> {
         }
 
         if (ticketRow.assigned_admin_id === assignedAdminId){
-            res.json({ok: true});
+            const currentTicket = await db.get(`SELECT * FROM tickets WHERE id = ?`, [ticketId]);
+            res.json({ ok: true, data: currentTicket });
             return;
         }
 
