@@ -166,6 +166,29 @@ describe('permissions', () => {
         });
     });
 
+    describe('audit-events', () => {
+        it('unauthenticated user cannot access audit events', async () => {
+            const agent = request.agent(app);
+            const res = await agent.get('/api/admin/audit-events');
+            expect(res.status).toBe(401);
+        });
+
+        it('non-admin user cannot access audit events', async () => {
+            const agent = request.agent(app);
+            await loginAsUserA(agent);
+            const res = await agent.get('/api/admin/audit-events');
+            expect(res.status).toBe(403);
+        });
+
+        it('admin can access audit events and receives data array', async () => {
+            const agent = request.agent(app);
+            await loginAsAdmin(agent);
+            const res = await agent.get('/api/admin/audit-events');
+            expect(res.status).toBe(200);
+            expect(Array.isArray(res.body.data)).toBe(true);
+        });
+    });
+
     describe('ticket creation and audit', () => {
         it('user can create a ticket and audit event is created', async () => {
             const agent = request.agent(app);
