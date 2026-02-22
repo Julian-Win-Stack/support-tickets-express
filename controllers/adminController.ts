@@ -62,10 +62,15 @@ const VALID_AUDIT_ACTIONS = new Set([
 
 const VALID_ENTITY_TYPES = new Set(['ticket', 'notes', 'user']);
 
+/** Escape LIKE wildcards so user input is treated as literal. */
+function escapeLikePattern(s: string): string {
+    return s.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_');
+}
+
 /**
- * GET /api/admin/audit-events?offset=0&action=ticket_created&entity_type=ticket (optional)
+ * GET /api/admin/audit-events?offset=0&action=...&entity_type=...&search=... (optional)
  * List audit events, newest first. Limit 50 per request. Offset for load-more pagination.
- * Optional filters: ?action=..., ?entity_type=ticket|notes|user
+ * Optional filters: ?action=..., ?entity_type=ticket|notes|user, ?search=... (matches name or email)
  */
 export async function listAuditEvents(req: Request, res: Response): Promise<void> {
     try {
@@ -93,6 +98,11 @@ export async function listAuditEvents(req: Request, res: Response): Promise<void
             res.status(400).json({ error: 'Invalid entity_type' });
             return;
         }
+        const rawSearch = req.query.search;
+        const search =
+            typeof rawSearch === 'string' && rawSearch.trim()
+                ? rawSearch.trim()
+                : undefined;
         const db = getDB();
         const conditions: string[] = [];
         const params: (string | number)[] = [];
@@ -103,6 +113,11 @@ export async function listAuditEvents(req: Request, res: Response): Promise<void
         if (entityType) {
             conditions.push('a.entity_type = ?');
             params.push(entityType);
+        }
+        if (search) {
+            const pattern = `%${escapeLikePattern(search)}%`;
+            conditions.push('(u.email LIKE ? OR u.name LIKE ?)');
+            params.push(pattern, pattern);
         }
         const whereClause =
             conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
