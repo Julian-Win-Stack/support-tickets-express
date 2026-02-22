@@ -1,5 +1,6 @@
 import * as jobsDb from '../lib/jobsDb.js';
 import { getNotificationsByUser, listLatestNotifications } from '../lib/notificationsDb.js';
+import { escapeLikePattern } from '../lib/escapeLikePattern.js';
 import type { Request, Response } from 'express';
 import { getDB } from '../db/db.js';
 /**
@@ -61,11 +62,6 @@ const VALID_AUDIT_ACTIONS = new Set([
 ]);
 
 const VALID_ENTITY_TYPES = new Set(['ticket', 'notes', 'user']);
-
-/** Escape LIKE wildcards so user input is treated as literal. */
-function escapeLikePattern(s: string): string {
-    return s.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_');
-}
 
 /**
  * GET /api/admin/audit-events?offset=0&action=...&entity_type=...&search=... (optional)

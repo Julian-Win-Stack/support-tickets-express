@@ -1,3 +1,5 @@
+import { escapeLikePattern } from '../lib/escapeLikePattern.js';
+
 export function buildTicketConstraints(role : string, userId : number, cleanStatus : string, cleanSearch : string, adminViewCondition : string): { whereParts : string[], userInput : (string | number)[] } {
    const whereParts: string[] = [];
    const userInput: (string | number)[] = [];
@@ -22,9 +24,9 @@ export function buildTicketConstraints(role : string, userId : number, cleanStat
     }
 
     if (cleanSearch){
+        const pattern = `%${escapeLikePattern(cleanSearch)}%`;
         whereParts.push('(T.title LIKE ? OR T.body LIKE ?)');
-        userInput.push(`%${cleanSearch}%`);
-        userInput.push(`%${cleanSearch}%`);
+        userInput.push(pattern, pattern);
     }
     return { whereParts, userInput };
 }
