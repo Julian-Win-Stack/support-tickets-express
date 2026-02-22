@@ -47,9 +47,23 @@ export async function listNotifications(req: Request, res: Response): Promise<vo
     return;
 }
 
+const VALID_AUDIT_ACTIONS = new Set([
+    'ticket_status_updated',
+    'ticket_assigned',
+    'ticket_unassigned',
+    'ticket_created',
+    'ticket_title_body_updated',
+    'note_created',
+    'escalated_ticket',
+    'user_registered',
+    'user_logged_in',
+    'user_logged_out',
+]);
+
 /**
- * GET /api/admin/audit-events?offset=0
+ * GET /api/admin/audit-events?offset=0&action=ticket_created (optional)
  * List audit events, newest first. Limit 50 per request. Offset for load-more pagination.
+ * Optional action filter: ?action=ticket_assigned, ?action=ticket_unassigned, etc.
  */
 export async function listAuditEvents(req: Request, res: Response): Promise<void> {
     try {
@@ -59,15 +73,30 @@ export async function listAuditEvents(req: Request, res: Response): Promise<void
             res.status(400).json({ error: 'Invalid offset' });
             return;
         }
+        const rawAction = req.query.action;
+        const action =
+            typeof rawAction === 'string' && rawAction.trim()
+                ? rawAction.trim()
+                : undefined;
+        if (action !== undefined && !VALID_AUDIT_ACTIONS.has(action)) {
+            res.status(400).json({ error: 'Invalid action' });
+            return;
+        }
         const db = getDB();
-        const rows = await db.all(
-            `SELECT a.id, a.actor_user_id, a.action, a.entity_type, a.entity_id, a.before, a.after, a.created_at,
-             u.name AS actor_name, u.email AS actor_email, u.role AS actor_role
-             FROM audit_events a
-             LEFT JOIN users u ON a.actor_user_id = u.id
-             ORDER BY a.created_at DESC LIMIT 50 OFFSET ?`,
-            [offset]
-        );
+        const sql = action
+            ? `SELECT a.id, a.actor_user_id, a.action, a.entity_type, a.entity_id, a.before, a.after, a.created_at,
+               u.name AS actor_name, u.email AS actor_email, u.role AS actor_role
+               FROM audit_events a
+               LEFT JOIN users u ON a.actor_user_id = u.id
+               WHERE a.action = ?
+               ORDER BY a.created_at DESC LIMIT 50 OFFSET ?`
+            : `SELECT a.id, a.actor_user_id, a.action, a.entity_type, a.entity_id, a.before, a.after, a.created_at,
+               u.name AS actor_name, u.email AS actor_email, u.role AS actor_role
+               FROM audit_events a
+               LEFT JOIN users u ON a.actor_user_id = u.id
+               ORDER BY a.created_at DESC LIMIT 50 OFFSET ?`;
+        const params = action ? [action, offset] : [offset];
+        const rows = await db.all(sql, params);
         res.json({ data: rows });
         return;
     } catch (error) {
