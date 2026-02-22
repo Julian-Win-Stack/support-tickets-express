@@ -253,18 +253,24 @@ export default function AuditPage() {
                         </>
                       )}
                     </p>
-                    {event.before != null && event.after != null && (
-                      <p className="m-0 text-sm text-[#aab6d6]">
-                        <span className="text-[#e8eefc]">{event.before}</span>
-                        <span className="text-[#5a6478] mx-1">→</span>
-                        <span className="text-[#e8eefc]">{event.after}</span>
-                      </p>
-                    )}
-                    {event.before == null && event.after != null && (
-                      <p className="m-0 text-sm text-[#aab6d6]">
-                        {event.after}
-                      </p>
-                    )}
+                    {event.before != null &&
+                      event.after != null &&
+                      event.action !== 'user_logged_in' &&
+                      event.action !== 'user_logged_out' && (
+                        <p className="m-0 text-sm text-[#aab6d6]">
+                          <span className="text-[#e8eefc]">{event.before}</span>
+                          <span className="text-[#5a6478] mx-1">→</span>
+                          <span className="text-[#e8eefc]">{event.after}</span>
+                        </p>
+                      )}
+                    {event.before == null &&
+                      event.after != null &&
+                      event.action !== 'user_logged_in' &&
+                      event.action !== 'user_logged_out' && (
+                        <p className="m-0 text-sm text-[#aab6d6]">
+                          {event.after}
+                        </p>
+                      )}
                   </article>
                 );
               })}
