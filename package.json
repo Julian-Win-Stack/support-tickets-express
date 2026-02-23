@@ -11,7 +11,7 @@
     "test:worker": "NODE_ENV=test node scripts/workerTest.js",
     "test:seedJobs": "NODE_ENV=test node scripts/seed-jobs.js",
     "seed:admin": "tsx BackendHelper/seedAdmin.js",
-    "start": "node server.js",
+    "start": "tsx server.ts",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "nodemon -e ts --exec tsx server.ts",
     "dev:frontend": "cd frontend && npm run dev"
