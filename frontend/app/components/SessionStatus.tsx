@@ -43,12 +43,14 @@ const SessionStatus = () => {
               <span className="text-[#e8eefc]">Back to tickets</span>
             </Link>
           )}
-          <Link
-            href="/audit"
-            className="text-xs sm:text-sm py-1.5 px-3 sm:py-2 sm:px-4 rounded-[8px] border border-[#0e7490] bg-[#1c2a47] text-center w-[100px] sm:w-[140px] cursor-pointer hover:brightness-110 transition-[filter] no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0e7490] focus-visible:ring-offset-2 focus-visible:ring-offset-[#12121C]"
-          >
-            <span className="text-[#e8eefc]">Audit Logs</span>
-          </Link>
+          {user.role === 'admin' && (
+            <Link
+              href="/audit"
+              className="text-xs sm:text-sm py-1.5 px-3 sm:py-2 sm:px-4 rounded-[8px] border border-[#0e7490] bg-[#1c2a47] text-center w-[100px] sm:w-[140px] cursor-pointer hover:brightness-110 transition-[filter] no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0e7490] focus-visible:ring-offset-2 focus-visible:ring-offset-[#12121C]"
+            >
+              <span className="text-[#e8eefc]">Audit Logs</span>
+            </Link>
+          )}
         </div>
         </div>
       )}
