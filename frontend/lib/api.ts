@@ -1,4 +1,6 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
+// Use relative URLs so requests go through Next.js proxy (same-origin).
+// This avoids third-party cookie blocking on Safari/phones.
+const API_URL = "";
 
 function handleUnauthorized(res: Response): void {
   if (res.status === 401 && typeof window !== "undefined") {
