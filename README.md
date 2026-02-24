@@ -14,11 +14,7 @@ Users can create and edit tickets, while admins can assign tickets, update statu
 
 ## 🌐 Live Demo
 
-**Frontend**  
 https://perfect-prosperity-production-58e9.up.railway.app
-
-**Backend API**  
-https://support-tickets-express-production.up.railway.app
 
 ### Demo Accounts
 
