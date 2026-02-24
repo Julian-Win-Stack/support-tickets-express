@@ -15,13 +15,14 @@ export async function seedDemo(): Promise<void> {
   const hash = await bcrypt.hash(DEMO_PASSWORD, 10);
 
   // 1) Users: 6 total (2 admins, 4 users)
+  // Emails must be lowercase to match auth controller (loginEmail.trim().toLowerCase())
   const users = [
-    { name: 'Admin A', email: 'adminA@example.com', role: 'admin' as const },
-    { name: 'Admin B', email: 'adminB@example.com', role: 'admin' as const },
-    { name: 'User A', email: 'userA@example.com', role: 'user' as const },
-    { name: 'User B', email: 'userB@example.com', role: 'user' as const },
-    { name: 'User C', email: 'userC@example.com', role: 'user' as const },
-    { name: 'User D', email: 'userD@example.com', role: 'user' as const },
+    { name: 'Admin A', email: 'admina@example.com', role: 'admin' as const },
+    { name: 'Admin B', email: 'adminb@example.com', role: 'admin' as const },
+    { name: 'User A', email: 'usera@example.com', role: 'user' as const },
+    { name: 'User B', email: 'userb@example.com', role: 'user' as const },
+    { name: 'User C', email: 'userc@example.com', role: 'user' as const },
+    { name: 'User D', email: 'userd@example.com', role: 'user' as const },
   ];
 
   const ids: Record<string, number> = {};
@@ -33,12 +34,12 @@ export async function seedDemo(): Promise<void> {
     ids[u.email] = r.lastID!;
   }
 
-  const adminA = ids['adminA@example.com'];
-  const adminB = ids['adminB@example.com'];
-  const userA = ids['userA@example.com'];
-  const userB = ids['userB@example.com'];
-  const userC = ids['userC@example.com'];
-  const userD = ids['userD@example.com'];
+  const adminA = ids['admina@example.com'];
+  const adminB = ids['adminb@example.com'];
+  const userA = ids['usera@example.com'];
+  const userB = ids['userb@example.com'];
+  const userC = ids['userc@example.com'];
+  const userD = ids['userd@example.com'];
 
   // 2) Tickets: 23 total (10 open, 8 in_progress, 5 resolved)
   // 4 assigned to Admin A, 4 to Admin B, rest unassigned

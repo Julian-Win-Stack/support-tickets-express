@@ -10,11 +10,15 @@ const __dirname = path.dirname(__filename);
 
 let db: Database | null = null;
 
+function getDbPath(): string {
+    if (process.env.NODE_ENV === 'test') return path.join(__dirname, '..', 'test.db');
+    if (process.env.NODE_ENV === 'production') return '/tmp/app.db';
+    return path.join(__dirname, '..', 'app.db');
+}
+
 export async function initDBConnection(): Promise<Database>{
     if (db) return db;
-    const dbpath = process.env.NODE_ENV === 'test' 
-        ? path.join(__dirname, '..', 'test.db') 
-        : path.join(__dirname, '..', 'app.db');
+    const dbpath = getDbPath();
     db = await open({               
         filename: dbpath,
         driver: sqlite3.Database,
@@ -28,9 +32,7 @@ export function getDB(): Database{
 }
 
 export async function getDBConnection(): Promise<Database> {
-    const dbpath = process.env.NODE_ENV === 'test' ? 
-    path.join(__dirname, '..', 'test.db') 
-    : path.join(__dirname, '..', 'app.db');
+    const dbpath = getDbPath();
     return open({
         filename: dbpath,
         driver: sqlite3.Database,
