@@ -5,6 +5,7 @@ import session from "express-session";
 import "dotenv/config";
 import { fileURLToPath } from "url";
 import { initDB } from './db/initDB.js';
+import { seedDemo } from './db/seed.js';
 import { authRouter } from './routes/authRouter.js';
 import { ticketRouter } from './routes/ticketRouter.js';
 import { notesRouter } from './routes/notesRouter.js';
@@ -21,6 +22,9 @@ fetch('http://127.0.0.1:7242/ingest/27fe6fd2-65e8-45af-943a-8f4a6a7bfe17',{metho
 // #endregion
 await initDBConnection();
 await initDB();
+if (process.env.NODE_ENV !== 'test') {
+  await seedDemo();
+}
 
 const app = express();
 app.set('trust proxy', 1);
