@@ -61,6 +61,7 @@ The system separates:
 ### Frontend
 - Next.js
 - TypeScript
+- Tailwind CSS
 - Fetch API
 
 ### Backend
