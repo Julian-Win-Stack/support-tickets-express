@@ -18,3 +18,6 @@ app.db
 
 # Cursor plans (local only)
 .cursor/plans/
+
+# Personal interview-prep notes (local only)
+BACKEND_STUDY_PLAN.md
