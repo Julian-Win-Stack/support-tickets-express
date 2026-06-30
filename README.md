@@ -193,16 +193,6 @@ Includes:
 
 ## 🧠 Technical Highlights
 
-### Engineering Decisions
-- Database-backed job queue instead of in-memory
-- Idempotent job processing: duplicate notifications prevented by `UNIQUE(job_id, user_id)` + `INSERT OR IGNORE`
-- Non-atomic status updates by design  
-  (Ticket update proceeds even if audit/job fails to preserve UX)
-- Indexed job polling for efficient worker scans
-- Idempotent escalation sweep
-
----
-
 ### Security & Hardening
 - Session ID regeneration
 - Secure production cookie config
