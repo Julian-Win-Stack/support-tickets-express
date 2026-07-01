@@ -1,0 +1,56 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  # 1) Run the backend test suite. If it fails, deploy never runs.
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm test
+        env:
+          NODE_ENV: test
+
+  # 2) Deploy both services to Cloud Run. Only runs if `test` passed.
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # required for Workload Identity Federation
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/545235255861/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: github-deployer@support-ticket-501122.iam.gserviceaccount.com
+
+      - uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: support-ticket-501122
+
+      - name: Deploy backend
+        run: |
+          gcloud run deploy tickets-backend \
+            --source . \
+            --region us-central1 \
+            --allow-unauthenticated \
+            --quiet
+
+      - name: Deploy frontend
+        run: |
+          gcloud run deploy tickets-frontend \
+            --source ./frontend \
+            --region us-central1 \
+            --allow-unauthenticated \
+            --quiet
