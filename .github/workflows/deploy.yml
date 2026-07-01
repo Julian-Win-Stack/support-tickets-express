@@ -18,6 +18,8 @@ jobs:
       - run: npm test
         env:
           NODE_ENV: test
+          # Test-only value: the app throws on boot without it. Not the real secret.
+          SESSION_SECRET: ci-test-secret
 
   # 2) Deploy both services to Cloud Run. Only runs if `test` passed.
   deploy:
