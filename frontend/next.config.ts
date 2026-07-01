@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   reactCompiler: true,
   async rewrites() {
     const backend = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
